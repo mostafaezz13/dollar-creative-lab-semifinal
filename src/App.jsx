@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import Header from './components/Header.jsx';
 import Preloader from './components/Preloader.jsx';
-import VenomInteractions from './components/VenomInteractions.jsx';
 import CardTunnel from './components/CardTunnel.jsx';
 import EndingScreen from './components/EndingScreen.jsx';
 import AboutSection from './components/AboutSection.jsx';
@@ -476,7 +475,6 @@ export default function App() {
         <VideoModal project={activeModalProject} origin={projectOrigin} onClose={closeProject} />
       )}
       </div>
-      <VenomInteractions/>
     </>
   );
 }

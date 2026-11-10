@@ -4,8 +4,8 @@ import useReducedMotion from '../hooks/useReducedMotion.js';
 const DISCIPLINES = [
   { name: 'EDITING', heading: 'Find the rhythm.', detail: 'Every cut changes the story. Scrub through a sequence of frames and watch the picture break apart, then resolve.', instruction: 'SCRUB THE CUT', a: 'DECONSTRUCT', b: 'RESOLVE' },
   { name: 'COLOR', heading: 'From log look to final.', detail: 'Scroll to build contrast and color in a moving cinematic shot. The flat log look is a demonstration treatment, not original camera LOG.', instruction: 'SCROLL TO DEVELOP THE GRADE', a: 'LOG LOOK', b: 'FINAL GRADE' },
-  { name: 'FINISHING', heading: 'Ready for every screen.', detail: 'Online finishing, safe areas and delivery formats. Explore how a finished frame is prepared for widescreen, square and vertical delivery.', instruction: 'EXPLORE THE DELIVERY FORMATS', a: 'CONFORM', b: 'DELIVERY READY' },
-  { name: 'SOUND', heading: 'Feel every frequency.', detail: 'A six-second synthesized sonic study. Start the sound and watch the spectrum react to the audio in real time.', instruction: 'PLAY THE SONIC STUDY', a: '58 HZ', b: 'IMMERSIVE / STEREO' }
+  { name: 'SOUND', heading: 'Feel every frequency.', detail: 'A six-second synthesized sonic study. Start the sound and watch the spectrum react to the audio in real time.', instruction: 'PLAY THE SONIC STUDY', a: '58 HZ', b: 'IMMERSIVE / STEREO' },
+  { name: 'FINISHING', heading: 'Ready for every screen.', detail: 'Online finishing, safe areas and delivery formats. Explore how a finished frame is prepared for widescreen, square and vertical delivery.', instruction: 'EXPLORE THE DELIVERY FORMATS', a: 'CONFORM', b: 'DELIVERY READY' }
 ];
 const FRAME_PATHS = ['/craft-frame-1.jpg', '/craft-frame-2.jpg', '/craft-frame-3.jpg', '/craft-frame-4.jpg', '/craft-frame-5.jpg'];
 

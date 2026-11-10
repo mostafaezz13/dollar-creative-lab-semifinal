@@ -121,7 +121,7 @@ export default function CardTunnel({ cards, cameraZ, maxZ, onCardClick, paused =
         }}
       >
         <div className="depth-grid" aria-hidden="true" />
-        {['EDITING', 'COLOR', 'FINISHING', 'SOUND'].map((word, index) => {
+        {['EDITING', 'COLORING', 'SOUND', 'FINISHING'].map((word, index) => {
           const z = (-800 - index * 2200) * zStretch;
           const relative = z + cameraZ;
           return <div key={word} className={`depth-type depth-type-${index}`} aria-hidden="true" style={{

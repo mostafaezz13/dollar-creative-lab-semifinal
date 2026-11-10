@@ -55,11 +55,6 @@ export default function WorkSection({ projects, onProjectClick, onBack, onNext, 
       <div id="archiveInner" className="archive-inner">
         {/* Topbar */}
         <div className="archive-topbar">
-          <button id="archiveBackBtn" className="archive-back-btn group" type="button" aria-label="Back to Showreel" onClick={onBack}>
-            <span className="bracket bracket-left">[</span>
-            <span>BACK TO SHOWREEL</span>
-            <span className="bracket bracket-right">]</span>
-          </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
             <div className="archive-topbar-title"><SplitText type="chars" inView={inView}>PROJECT ARCHIVE</SplitText></div>
           </div>
@@ -148,14 +143,6 @@ export default function WorkSection({ projects, onProjectClick, onBack, onNext, 
         {/* Footer */}
         <div className="archive-footer">
           <div className="archive-footer-copy">© DOLLAR CREATIVE LAB — POST PRODUCTION HOUSE</div>
-          <button
-            id="archiveToContactBtn"
-            className="cult-next-btn group"
-            type="button"
-            onClick={onNext}
-          >
-            <span>GET IN TOUCH</span> →
-          </button>
         </div>
       </div>
     </section>

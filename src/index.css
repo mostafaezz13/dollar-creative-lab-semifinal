@@ -1777,8 +1777,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 80px;
-            height: 80px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.12);
             border: 1px solid rgba(255, 255, 255, 0.3);
@@ -1919,8 +1919,9 @@
 
         .cult-contact-footer {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
+            text-align: center;
             margin-top: 40px;
             padding-top: 24px;
             border-top: 1px solid rgba(255, 255, 255, 0.08);

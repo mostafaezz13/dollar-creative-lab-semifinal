@@ -32,7 +32,7 @@ The production output is `dist/`. On Vercel or Netlify, select Vite, use `npm ru
 ## Current behavior
 
 - Pointer-controlled 3D project tunnel with projected click targets for the first 10 projects and full-screen film transitions. Card media retain their original colors.
-- Editing, Color, Finishing and Sound studies.
+- Editing, Coloring, Finishing and Sound studies.
 - Scroll-controlled simulated log-look to graded video treatment.
 - Animated showreel, contact and studio-name sections. Arriving at the studio ending consumes the current wheel/touch gesture; a fresh gesture continues to the next chapter.
 - Keyboard navigation, dialog focus handling and reduced-motion support.

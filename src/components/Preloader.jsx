@@ -50,7 +50,7 @@ export default function Preloader({ posters, onComplete }) {
           <div className="preload-reel" aria-hidden="true"><i/><i/><i/><span>$</span></div>
           <span className="preload-eyebrow">BEFORE THE FIRST FRAME</span>
           <div className="preload-word" aria-hidden="true">{'DOLLAR'.split('').map((letter,index)=><span key={index} style={{'--letter':index}}>{letter}</span>)}</div>
-          <div className="preload-disciplines"><span>EDITING</span><i/><span>COLOR</span><i/><span>FINISHING</span><i/><span>SOUND</span></div>
+          <div className="preload-disciplines"><span>EDITING</span><i/><span>COLORING</span><i/><span>SOUND</span><i/><span>FINISHING</span></div>
         </div>
         <div className="preload-bottomline"><span>{progress===100 ? 'THE STAGE IS YOURS' : 'PREPARING THE FIRST FRAME'}<small>FONTS / OPENING ARTWORK</small></span><span className="preload-counter">{String(progress).padStart(3,'0')}<small>%</small></span></div>
         <div className="preload-track" role="progressbar" aria-label="Opening artwork loading" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{transform:`scaleX(${progress/100})`}}/></div>
