@@ -289,3 +289,14 @@ body, body.theme-light, .page-content-track, .page-content-track.theme-light { b
 .project-cinema > .film-vimeo { width:100%; height:100%; }
 .vimeo-external-link { display:block; color:var(--signal); padding:14px; text-decoration:underline; }
 .cursor-preview-media.film-vimeo { position:absolute; inset:0; }
+.film-vimeo { background-position:center; background-repeat:no-repeat; background-size:contain; }
+.pcard .film-vimeo { background-size:cover; }
+.film-vimeo iframe { opacity:0; transition:opacity .3s ease; }
+.film-vimeo[data-ready="true"] iframe { opacity:1; }
+.showreel-description { max-width:800px; margin:14px 0 28px; white-space:pre-line; color:#aeb4a7; font:11px/1.8 ltsuperiormono_medium,monospace; }
+/* Keep wheel/touch events in the app above the picture; Vimeo's controls stay
+   reachable in the bottom strip of the iframe. */
+.reel-scroll-surface { position:absolute; inset:0 0 56px; z-index:3; display:block; width:100%; padding:0; border:0; background:transparent; color:white; cursor:pointer; }
+.reel-scroll-surface .cult-showreel-play-toggle { pointer-events:none; opacity:1; }
+.reel-scroll-surface[aria-pressed="true"] .cult-showreel-play-toggle { opacity:0; }
+.reel-scroll-surface:hover .cult-showreel-play-toggle, .reel-scroll-surface:focus-visible .cult-showreel-play-toggle { opacity:1; }

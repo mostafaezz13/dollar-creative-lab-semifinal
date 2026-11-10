@@ -4,7 +4,7 @@ import { mediaUrl } from '../utils/content.js';
 import { parseVimeoUrl, vimeoEmbedUrl, isVimeoHost } from '../utils/vimeo.js';
 
 // One lifecycle for native files and Vimeo: play, pause and cleanup are shared by the site.
-const FilmPlayer = forwardRef(function FilmPlayer({ source, title = 'Film', poster = '', autoplay = false, active = true, muted = false, loop = false, controls = true, background = false, preload = 'metadata', className = '', id, onPlay, onPause, onError, onReady }, ref) {
+const FilmPlayer = forwardRef(function FilmPlayer({ source, title = 'Film', poster = '', autoplay = false, active = true, muted = false, loop = false, controls = true, background = false, preload = 'metadata', aspectRatio = 16/9, className = '', id, onPlay, onPause, onError, onReady }, ref) {
   const nativeRef = useRef(null);
   const hostRef = useRef(null);
   const apiRef = useRef(null);
@@ -38,6 +38,7 @@ const FilmPlayer = forwardRef(function FilmPlayer({ source, title = 'Film', post
   useEffect(() => {
     if (!renderEmbed || !hostRef.current) return;
     const host = hostRef.current;
+    host.dataset.ready = 'false';
     let disposed = false;
     const iframe = document.createElement('iframe');
     iframe.src = embed;
@@ -47,6 +48,14 @@ const FilmPlayer = forwardRef(function FilmPlayer({ source, title = 'Film', post
     iframe.setAttribute('frameborder','0');
     iframe.setAttribute('referrerpolicy','strict-origin-when-cross-origin');
     host.appendChild(iframe);
+    const resize = () => {
+      if (!background || !(aspectRatio > 0)) return;
+      const width = Math.max(host.clientWidth, host.clientHeight * aspectRatio);
+      const height = width / aspectRatio;
+      Object.assign(iframe.style, { inset: 'auto', left: '50%', top: '50%', width: `${width}px`, height: `${height}px`, transform: 'translate(-50%,-50%)' });
+    };
+    const observer = background ? new ResizeObserver(resize) : null;
+    observer?.observe(host); resize();
     const player = new Player(iframe);
     apiRef.current = player;
     player.on('play', () => { if (!disposed) callbacks.current.onPlay?.(); });
@@ -54,16 +63,18 @@ const FilmPlayer = forwardRef(function FilmPlayer({ source, title = 'Film', post
     player.on('error', error => { if (!disposed) callbacks.current.onError?.(error); });
     player.ready().then(() => {
       if (disposed) return;
+      host.dataset.ready = 'true';
       callbacks.current.onReady?.();
       if (wantsPlay.current || (playback.current.autoplay && playback.current.active)) player.play().catch(() => {});
     }).catch(error => { if (!disposed) callbacks.current.onError?.(error); });
     return () => {
       disposed = true;
+      observer?.disconnect();
       if (apiRef.current === player) apiRef.current = null;
       player.destroy().catch(() => {});
       iframe.remove();
     };
-  }, [embed, renderEmbed]);
+  }, [embed, renderEmbed, aspectRatio]);
 
   useEffect(() => {
     if (!active) {
@@ -80,7 +91,7 @@ const FilmPlayer = forwardRef(function FilmPlayer({ source, title = 'Film', post
   if (unavailable) return <div className={`film-player film-placeholder ${className}`} role="status">Film unavailable</div>;
   if (vimeo) {
     if (background && !active) return poster ? <img className={`film-player film-poster ${className}`} src={mediaUrl(poster)} alt="" /> : <div className={`film-player film-placeholder ${className}`} aria-hidden="true" />;
-    return <div id={id} ref={hostRef} className={`film-player film-vimeo ${className}`} />;
+    return <div id={id} ref={hostRef} className={`film-player film-vimeo ${className}`} style={poster ? { backgroundImage: `url(${JSON.stringify(mediaUrl(poster))})` } : undefined} />;
   }
   return <video id={id} ref={nativeRef} className={`film-player film-native ${className}`} src={background && !active ? undefined : mediaUrl(source)} poster={mediaUrl(poster)} playsInline muted={muted} loop={loop} controls={controls} preload={background && !active ? 'none' : preload} onPlay={onPlay} onPause={onPause} onLoadedData={onReady} onError={() => onError?.(new Error('The video could not load.'))} />;
 });

@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import useReducedMotion from '../hooks/useReducedMotion.js';
 import FilmPlayer from './FilmPlayer.jsx';
-import { parseVimeoUrl } from '../utils/vimeo.js';
-import { PLACEHOLDER_VIDEO, PLACEHOLDER_POSTER } from '../data/projects.js';
+import { PLACEHOLDER_VIDEO } from '../data/projects.js';
 
 const EXIT_DIRS = [
   { x: -1, y: 0 },
@@ -105,6 +104,12 @@ export default function CardTunnel({ cards, cameraZ, maxZ, onCardClick, paused =
   const convergeStart = -2000;
   const convergeEnd = 0;
   const exitStart = 650;
+  const previewIndex = cards.reduce((best,card,index) => {
+    const relative = card.z * zStretch + cameraZ;
+    if (relative < -1200 || relative > 1250) return best;
+    const distance = Math.abs(relative - 300);
+    return !best || distance < best.distance ? { index, distance } : best;
+  }, null)?.index ?? -1;
 
   return (
     <>
@@ -214,10 +219,9 @@ export default function CardTunnel({ cards, cameraZ, maxZ, onCardClick, paused =
                 title={`${card.sub} — ${card.title}`}
                 background muted loop controls={false}
                 autoplay={!reducedMotion}
-                active={isVisible && effectiveZ > -1200 && effectiveZ < 1350 && !reducedMotion && !paused}
-                poster={parseVimeoUrl(card.project?.videoUrl)
-                  ? (card.project?.poster !== PLACEHOLDER_POSTER ? card.project?.poster : '')
-                  : (!card.project?.poster || card.project.poster === PLACEHOLDER_POSTER ? ['/craft-frame-1.jpg', '/craft-frame-2.jpg', '/craft-frame-3.jpg', '/craft-frame-4.jpg', '/craft-frame-5.jpg'][i % 5] : card.project.poster)}
+                active={isVisible && i === previewIndex && !reducedMotion && !paused}
+                poster={card.project?.poster || ''}
+                aspectRatio={card.project?.width && card.project?.height ? card.project.width / card.project.height : 16/9}
               />
               <span className="pcard-index">{card.idx}</span>
               <span className="pcard-tag">{card.tag}</span>
@@ -240,7 +244,7 @@ export default function CardTunnel({ cards, cameraZ, maxZ, onCardClick, paused =
         className="card-hit-target" data-card-index={i}
         aria-label={`Play ${card.sub} — ${card.title}`}
         disabled={!interactive} tabIndex={-1}
-        style={{ zIndex: Math.round(10000 + card.z), visibility: 'hidden' }}
+        style={{ zIndex: cards.length - i, visibility: 'hidden' }}
         onClick={() => onCardClick(card, visualsRef.current[i])}
         onPointerEnter={() => visualsRef.current[i]?.classList.add('is-hovered')}
         onPointerLeave={() => visualsRef.current[i]?.classList.remove('is-hovered')}

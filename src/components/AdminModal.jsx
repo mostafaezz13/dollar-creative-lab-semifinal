@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
 import useDialog from '../hooks/useDialog.js';
-import { PLACEHOLDER_VIDEO, PLACEHOLDER_POSTER } from '../data/projects.js';
 
 export default function AdminModal({ projects, onSave, onClose, error }) {
   const dialogRef = useRef(null);
@@ -20,9 +19,9 @@ export default function AdminModal({ projects, onSave, onClose, error }) {
       category: "EDITING",
       role: "EDITING",
       year: new Date().getFullYear().toString(),
-      videoUrl: PLACEHOLDER_VIDEO,
-      poster: PLACEHOLDER_POSTER,
-      previewVisual: PLACEHOLDER_VIDEO,
+      videoUrl: '',
+      poster: '',
+      previewVisual: '',
       credits: "",
       hasCredit: false
     };

@@ -12,12 +12,12 @@ import useReducedMotion from './hooks/useReducedMotion.js';
 import FilmPlayer from './components/FilmPlayer.jsx';
 import { parseVimeoUrl } from './utils/vimeo.js';
 import { createEndingGate, advanceEndingGate } from './utils/endingGate.js';
-import { DEFAULT_PROJECTS, INITIAL_CARDS } from './data/projects.js';
+import { DEFAULT_PROJECTS, INITIAL_CARDS, PROJECTS_STORAGE_KEY } from './data/projects.js';
 
 export default function App() {
   const [projects, setProjects] = useState(() => {
     try {
-      const stored = localStorage.getItem('dollar_projects_v2');
+      const stored = localStorage.getItem(PROJECTS_STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.every(p => p && typeof p === 'object' && typeof p.title === 'string' && (typeof p.id === 'string' || typeof p.id === 'number'))) return parsed.map(p => ({ ...p, client: String(p.client || ''), category: String(p.category || '').replace(/\bEDIT\b/gi,'EDITING').replace(/\bVFX\b/gi,'FINISHING'), role: String(p.role || '').replace(/\bEDIT\b/gi,'EDITING').replace(/\bVFX\b/gi,'FINISHING'), year: String(p.year || '') }));
@@ -35,7 +35,8 @@ export default function App() {
   const [storageError, setStorageError] = useState('');
   const closeAdmin = useCallback(() => setAdminOpen(false), []);
   const closeProject = useCallback(() => setActiveModalProject(null), []);
-  const maxZ = Math.max(...INITIAL_CARDS.map(card => -card.z)) * (isMobile ? 1.4 : 1) + 1500;
+  const cards = useMemoCards(INITIAL_CARDS, projects);
+  const maxZ = Math.max(0,...cards.map(card => -card.z)) * (isMobile ? 1.4 : 1) + 1500;
   const brandStart = maxZ - 200;
   const endingGateRef = useRef(createEndingGate());
   const gestureRef = useRef({ wheel: 0, lastWheel: -Infinity, touch: 0, key: 0 });
@@ -103,9 +104,6 @@ export default function App() {
   }, [totalMaxZ]);
 
   useEffect(() => { if (!isMobile) setMenuOpen(false); }, [isMobile]);
-
-  // Combine initial 3D cards with current projects data
-  const cards = useMemoCards(INITIAL_CARDS, projects);
 
   // Core Animation Loop (smooth lerp for cameraZ & scroll flow)
   useEffect(() => {
@@ -302,7 +300,7 @@ export default function App() {
 
   const saveProjects = (next) => {
     try {
-      localStorage.setItem('dollar_projects_v2', JSON.stringify(next));
+      localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(next));
       setProjects(next);
       setStorageError('');
       return true;
@@ -475,20 +473,12 @@ export default function App() {
 
 // Helper hook to map projects data to initial 3D card layout
 function useMemoCards(initialCards, projects) {
-  return React.useMemo(() => {
-    if (!projects.length) return [];
-    return initialCards.map((card, idx) => {
-      const p = projects[idx % projects.length];
-      if (p) {
-        return {
-          ...card,
-          project: p,
-          title: p.title || card.title,
-          sub: p.client || card.sub,
-          tag: p.category || card.tag
-        };
-      }
-      return card;
-    });
-  }, [initialCards, projects]);
+  return React.useMemo(() => projects.map((project, index) => {
+    const layout = initialCards[index] || {
+      ...initialCards[index % initialCards.length],
+      z: initialCards.at(-1).z - (index - initialCards.length + 1) * 550
+    };
+    return { ...layout, idx: String(index + 1).padStart(2,'0'), project,
+      title: project.title, sub: project.client || 'Dollar Creative Lab', tag: project.category || 'POST PRODUCTION' };
+  }), [initialCards, projects]);
 }

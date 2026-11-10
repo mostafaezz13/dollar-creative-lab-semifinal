@@ -41,7 +41,7 @@ The project manager stores edits in the current browser's `localStorage`. Those 
 
 ## Content and media
 
-Default projects, credits, addresses, social destinations and shared demo films are presentation content. Replace and verify them before a public client launch. The existing font and original video assets are retained from the source repository; their publication rights should be confirmed by the owner.
+Projects, titles, descriptions and posters are imported from the 27 public videos of [Dollar Creative Lab on Vimeo](https://vimeo.com/dollarcreativelab). Credits preserve the account descriptions; project years are Vimeo upload years. Confirm studio contact details and social destinations before a client launch. The existing font and original video assets are retained from the source repository; their publication rights should be confirmed by the owner.
 
 The added color-study excerpt is from *Tears of Steel*, licensed CC BY 3.0. The source, attribution and changes are documented in [MEDIA-CREDITS.md](MEDIA-CREDITS.md) and displayed in the app. Its flat/log-like appearance is a demonstration filter, not original camera LOG. Its cropped video is 1920×720 without upscaling.
 
@@ -58,8 +58,14 @@ videoUrl: 'https://vimeo.com/VIDEO_ID/UNLISTED_HASH',
 poster: 'https://your-image-host.example/project-poster.jpg'
 ```
 
-Change the studio reel in `src/data/showreel.js`. Default demo MP4s remain until the real account catalogue and reel have been selected. Setting a Vimeo URL in the local project manager changes only that browser; change the source data and push it for shared publication.
+Change the studio reel in `src/data/showreel.js`. The real account catalogue is in `src/data/vimeo-projects.json`; the owner-selected reel is **SELECTED BRAND WORK** (Vimeo ID `1237014270`). Setting a Vimeo URL in the local project manager changes only that browser; change the source data and push it for shared publication.
 
-Only nearby cards load moving Vimeo previews; distant cards use the project's poster or a neutral placeholder. Full project films keep Vimeo's controls. Closing a project and leaving the showreel pause playback. Vimeo-backed HTML exports require Internet access for the Vimeo player and video streams.
+Only the single nearest eligible card loads a moving Vimeo preview; distant cards use the project's poster or a neutral placeholder. Full project films keep Vimeo's controls. Closing a project and leaving the showreel pause playback. Vimeo-backed HTML exports require Internet access for the Vimeo player and video streams.
 
-The account catalogue and actual Vimeo playback must be checked with access to the supplied account before claiming the real-video replacement is complete. Private/unlisted films not exposed on the public profile need their complete share URLs. No Vimeo access token belongs in this frontend.
+Private/unlisted films not exposed on the public profile need their complete share URLs. No Vimeo access token belongs in this frontend.
+
+### Refresh the public catalogue
+
+Run `python scripts/import-vimeo.py` to refresh the studio's public titles, descriptions, upload-year metadata, and bundled JPEG posters. The importer checks the account owner ID and stops rather than silently truncating a full legacy API catalogue. Unlisted videos absent from the public profile require explicit share URLs.
+
+All catalogue films get tunnel cards and archive rows. The local manager now uses `dollar_projects_vimeo_v1`; the previous `dollar_projects_v2` key is retained without deletion so old demo edits cannot override the imported catalogue. The Color study remains the separately attributed illustrative log-look exercise described in `MEDIA-CREDITS.md`.
