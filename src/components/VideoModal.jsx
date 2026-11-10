@@ -1,5 +1,7 @@
 import React, { useRef, useState, useEffect, useLayoutEffect, useCallback } from 'react';
 import useDialog from '../hooks/useDialog.js';
+import FilmPlayer from './FilmPlayer.jsx';
+import { parseVimeoUrl } from '../utils/vimeo.js';
 import useReducedMotion from '../hooks/useReducedMotion.js';
 import { mediaUrl, safeCredits } from '../utils/content.js';
 
@@ -44,13 +46,14 @@ export default function VideoModal({ project, origin, onClose }) {
 
   const display = project.client ? `${project.client} — ${project.title}` : project.title;
   const tags = (project.role || project.category || '').split('/').map(t => t.trim()).filter(Boolean);
-  const source = mediaUrl(project.videoUrl || project.previewVisual);
+  const source = project.videoUrl || project.previewVisual;
+  const vimeo = parseVimeoUrl(source);
 
   return (
     <div id="vModal" ref={dialogRef} className={`open cinema-dialog${entered ? ' entered' : ''}${closing ? ' returning' : ''}`} role="dialog" aria-modal="true" aria-labelledby="project-dialog-title" tabIndex={-1} onClick={requestClose}>
       <button className="vm-close" onClick={requestClose} aria-label="Close project"><span>BACK TO FRAMES</span> ✕</button>
       <div className="project-cinema" ref={stageRef} onClick={e => e.stopPropagation()}>
-        {source && !failed ? <video ref={videoRef} controls playsInline preload="auto" poster={mediaUrl(project.poster)} src={source} onError={() => setFailed(true)} /> : <p className="media-error" role="status">This film is currently unavailable. Please try again later.</p>}
+        {source && !failed ? <FilmPlayer ref={videoRef} source={source} title={display} controls preload="metadata" poster={project.poster} onError={() => setFailed(true)} /> : <p className="media-error" role="status">This film is currently unavailable. Please try again later.{vimeo && <a className="vimeo-external-link" href={`https://vimeo.com/${vimeo.id}${vimeo.hash ? `/${vimeo.hash}` : ''}`} target="_blank" rel="noreferrer">Watch on Vimeo ↗</a>}</p>}
         <div className="cinema-film-caption"><span>NOW SHOWING / {project.year}</span><h2 id="project-dialog-title">{display}</h2><div>{tags.join(' / ')}</div></div>
       </div>
       <div className="cinema-project-details" onClick={e => e.stopPropagation()}>

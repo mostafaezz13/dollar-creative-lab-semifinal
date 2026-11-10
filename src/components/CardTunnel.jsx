@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import useReducedMotion from '../hooks/useReducedMotion.js';
+import FilmPlayer from './FilmPlayer.jsx';
+import { parseVimeoUrl } from '../utils/vimeo.js';
 import { PLACEHOLDER_VIDEO, PLACEHOLDER_POSTER } from '../data/projects.js';
 
 const EXIT_DIRS = [
@@ -207,14 +209,15 @@ export default function CardTunnel({ cards, cameraZ, maxZ, onCardClick, paused =
               }}
             >
               {['tl','tr','br','bl'].map(corner => <i key={corner} className={`card-projection-corner corner-${corner}`} aria-hidden="true" />)}
-              <video
-                muted
-                loop
-                playsInline
-                autoPlay={!reducedMotion}
-                preload="none"
-                poster={!card.project?.poster || card.project.poster === PLACEHOLDER_POSTER ? ['/craft-frame-1.jpg', '/craft-frame-2.jpg', '/craft-frame-3.jpg', '/craft-frame-4.jpg', '/craft-frame-5.jpg'][i % 5] : card.project.poster}
-                src={isVisible && effectiveZ > -1800 && effectiveZ < 1350 && !reducedMotion ? (card.project?.videoUrl || PLACEHOLDER_VIDEO) : undefined}
+              <FilmPlayer
+                source={card.project?.videoUrl || PLACEHOLDER_VIDEO}
+                title={`${card.sub} — ${card.title}`}
+                background muted loop controls={false}
+                autoplay={!reducedMotion}
+                active={isVisible && effectiveZ > -1200 && effectiveZ < 1350 && !reducedMotion && !paused}
+                poster={parseVimeoUrl(card.project?.videoUrl)
+                  ? (card.project?.poster !== PLACEHOLDER_POSTER ? card.project?.poster : '')
+                  : (!card.project?.poster || card.project.poster === PLACEHOLDER_POSTER ? ['/craft-frame-1.jpg', '/craft-frame-2.jpg', '/craft-frame-3.jpg', '/craft-frame-4.jpg', '/craft-frame-5.jpg'][i % 5] : card.project.poster)}
               />
               <span className="pcard-index">{card.idx}</span>
               <span className="pcard-tag">{card.tag}</span>

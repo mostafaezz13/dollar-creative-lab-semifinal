@@ -9,6 +9,8 @@ import ContactSection from './components/ContactSection.jsx';
 import VideoModal from './components/VideoModal.jsx';
 import AdminModal from './components/AdminModal.jsx';
 import useReducedMotion from './hooks/useReducedMotion.js';
+import FilmPlayer from './components/FilmPlayer.jsx';
+import { parseVimeoUrl } from './utils/vimeo.js';
 import { createEndingGate, advanceEndingGate } from './utils/endingGate.js';
 import { DEFAULT_PROJECTS, INITIAL_CARDS } from './data/projects.js';
 
@@ -334,7 +336,7 @@ export default function App() {
   const isLight = theme === 'light';
   const showCursorPreview = !!hoveredProject;
   const previewVisual = hoveredProject?.previewVisual || '';
-  const isVideo = previewVisual.startsWith('data:video/') || /\.(mp4|webm|mov)$/i.test(previewVisual);
+  const isVideo = Boolean(parseVimeoUrl(previewVisual)) || previewVisual.startsWith('data:video/') || /\.(mp4|webm|mov)$/i.test(previewVisual);
   const isImage = previewVisual.startsWith('data:image/') || /\.(jpg|jpeg|png|webp|gif)$/i.test(previewVisual);
   const monogram =
     (hoveredProject?.client || 'DL').replace(/[^a-zA-Z0-9]/g, '').slice(0, 2).toUpperCase() || 'DL';
@@ -430,7 +432,7 @@ export default function App() {
         <div className="cursor-preview-bg" />
         <div className="cursor-preview-media-wrap">
           {showCursorPreview && isVideo && (
-            <video className="cursor-preview-media" muted playsInline loop autoPlay src={previewVisual} />
+            <FilmPlayer className="cursor-preview-media" title={hoveredProject.title} source={previewVisual} poster={hoveredProject.poster} background muted loop controls={false} autoplay />
           )}
           {showCursorPreview && !isVideo && isImage && (
             <img className="cursor-preview-media" src={previewVisual} alt="" />

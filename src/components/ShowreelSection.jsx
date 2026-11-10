@@ -2,10 +2,14 @@ import React, { useRef, useState, useEffect } from 'react';
 import useReveal from '../hooks/useReveal.js';
 import useScrollScene from '../hooks/useScrollScene.js';
 import SplitText from './SplitText.jsx';
+import FilmPlayer from './FilmPlayer.jsx';
+import { SHOWREEL } from '../data/showreel.js';
+import { parseVimeoUrl } from '../utils/vimeo.js';
 
 export default function ShowreelSection({ onBack, onNext, scrollOffset = 0 }) {
   const containerRef = useRef(null);
   const videoRef = useRef(null);
+  const usesVimeo = Boolean(parseVimeoUrl(SHOWREEL.videoUrl));
   const [playError, setPlayError] = useState('');
   const [isPlaying, setIsPlaying] = useState(false);
   const isInView = useReveal(containerRef, '.cult-eyebrow, .cult-showreel-meta');
@@ -14,8 +18,8 @@ export default function ShowreelSection({ onBack, onNext, scrollOffset = 0 }) {
   const togglePlay = async () => {
     const video = videoRef.current;
     if (!video) return;
-    if (!video.paused) { video.pause(); return; }
-    try { setPlayError(''); video.muted = false; await video.play(); }
+    if (isPlaying) { await video.pause(); return; }
+    try { setPlayError(''); await video.setMuted(false); await video.play(); }
     catch { setPlayError('Playback could not start. Try the video controls or retry.'); }
   };
   return (
@@ -25,8 +29,8 @@ export default function ShowreelSection({ onBack, onNext, scrollOffset = 0 }) {
         <div className="cult-eyebrow">SOUND ON. WORLD OFF.</div>
         <div className="cult-showreel-header"><h2 className="cult-showreel-title"><SplitText type="words" inView={isInView}>STUDIO SHOWREEL</SplitText></h2><div className="cult-showreel-meta">EDITING / COLOR / FINISHING / SOUND</div></div>
         <div className="reel-perspective"><div className="cult-showreel-player-box">
-          <video id="cultShowreelVideo" ref={videoRef} className="cult-showreel-video" loop playsInline preload="metadata" controls onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)} onError={() => setPlayError('The showreel is unavailable. Please try again later.')} poster="/craft-frame-4.jpg" src="/test.mp4" />
-          <button id="showreelPlayBtn" className="cult-showreel-play-toggle" aria-label={isPlaying ? 'Pause showreel' : 'Play showreel with sound'} aria-pressed={isPlaying} onClick={togglePlay}>{isPlaying ? 'Ⅱ' : '▶'}</button>
+          <FilmPlayer id="cultShowreelVideo" ref={videoRef} className="cult-showreel-video" title="Dollar Creative Lab Showreel" source={SHOWREEL.videoUrl} poster={SHOWREEL.poster} loop active={isInView} controls onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)} onError={() => setPlayError(usesVimeo ? 'The showreel could not load. Check its Vimeo sharing and embedding settings.' : 'The showreel could not load. Please try again.')} />
+          {!usesVimeo && <button id="showreelPlayBtn" className="cult-showreel-play-toggle" aria-label={isPlaying ? 'Pause showreel' : 'Play showreel with sound'} aria-pressed={isPlaying} onClick={togglePlay}>{isPlaying ? 'Ⅱ' : '▶'}</button>}
           <span className="reel-frame-label" aria-hidden="true">DOLLAR / MOTION PICTURE</span>
         </div></div>
         {playError && <p className="media-error" role="status">{playError}</p>}

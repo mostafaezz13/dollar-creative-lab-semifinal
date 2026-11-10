@@ -47,4 +47,19 @@ The added color-study excerpt is from *Tears of Steel*, licensed CC BY 3.0. The 
 
 ## Validation
 
-`npm run build` is the production build check. Browser validation has exercised real project clicks and mobile taps, color progression, delivery formats, showreel wheel and touch scrolling, the studio-name transition, and responsive contact layout. `npm test` runs five Node tests for the ending gesture gate, including inertia, a second gesture, reverse navigation, and touch momentum.
+`npm run build` is the production build check. Browser validation has exercised real project clicks and mobile taps, color progression, delivery formats, showreel wheel and touch scrolling, the studio-name transition, and responsive contact layout. `npm test` runs five Node tests for the ending gesture gate, including inertia, a second gesture, reverse navigation, and touch momentum, plus six Vimeo URL-validation and privacy-hash tests.
+
+## Vimeo videos
+
+The official `@vimeo/player` SDK is bundled with the app. A project's `videoUrl` accepts a complete Vimeo share URL, including its privacy hash for unlisted films. Do not put Vimeo page links in a native video element or use temporary progressive-download URLs.
+
+```js
+videoUrl: 'https://vimeo.com/VIDEO_ID/UNLISTED_HASH',
+poster: 'https://your-image-host.example/project-poster.jpg'
+```
+
+Change the studio reel in `src/data/showreel.js`. Default demo MP4s remain until the real account catalogue and reel have been selected. Setting a Vimeo URL in the local project manager changes only that browser; change the source data and push it for shared publication.
+
+Only nearby cards load moving Vimeo previews; distant cards use the project's poster or a neutral placeholder. Full project films keep Vimeo's controls. Closing a project and leaving the showreel pause playback. Vimeo-backed HTML exports require Internet access for the Vimeo player and video streams.
+
+The account catalogue and actual Vimeo playback must be checked with access to the supplied account before claiming the real-video replacement is complete. Private/unlisted films not exposed on the public profile need their complete share URLs. No Vimeo access token belongs in this frontend.

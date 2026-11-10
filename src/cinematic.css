@@ -280,3 +280,12 @@ body, body.theme-light, .page-content-track, .page-content-track.theme-light { b
  .split-unit-inner { will-change:auto; }
  .black-ending-screen.visible .brand-kicker, .black-ending-screen.visible .ending-sub, .black-ending-screen.visible .ending-buttons { animation:none; }
 }
+.film-player { display:block; width:100%; height:100%; }
+.film-vimeo { position:relative; overflow:hidden; }
+.film-vimeo iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+.pcard .film-vimeo, .pcard .film-poster, .pcard .film-placeholder { position:absolute; inset:0; pointer-events:none; }
+.pcard .film-poster { object-fit:cover; }
+.film-placeholder { background:radial-gradient(ellipse at 30% 0%,#34402a,#0a0d0a 75%); }
+.project-cinema > .film-vimeo { width:100%; height:100%; }
+.vimeo-external-link { display:block; color:var(--signal); padding:14px; text-decoration:underline; }
+.cursor-preview-media.film-vimeo { position:absolute; inset:0; }

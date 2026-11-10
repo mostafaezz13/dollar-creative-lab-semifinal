@@ -177,7 +177,7 @@ export default function AdminModal({ projects, onSave, onClose, error }) {
 
               <div>
                 <label className="block font-mono text-[9px] tracking-[2px] uppercase text-white/60 mb-1">
-                  Video URL (.mp4)
+                  Video URL (Vimeo share link or MP4)
                 </label>
                 <input
                   type="url"
