@@ -69,3 +69,9 @@ Private/unlisted films not exposed on the public profile need their complete sha
 Run `python scripts/import-vimeo.py` to refresh the studio's public titles, descriptions, upload-year metadata, and bundled JPEG posters. The importer checks the account owner ID and stops rather than silently truncating a full legacy API catalogue. Unlisted videos absent from the public profile require explicit share URLs.
 
 The first 10 projects appear in the opening tunnel; all 27 catalogue films remain in the project archive. The ending depth follows the displayed cards rather than the full catalogue. The local manager now uses `dollar_projects_vimeo_v1`; the previous `dollar_projects_v2` key is retained without deletion so old demo edits cannot override the imported catalogue. The Color study remains the separately attributed illustrative log-look exercise described in `MEDIA-CREDITS.md`.
+
+### Studio motion
+
+The opening sequence preloads fonts and the first three local posters, then reveals the tunnel with a split shutter. Video loading never blocks entry; a five-second asset deadline also prevents a stalled request from trapping visitors. Reduced-motion visitors get a short, static transition.
+
+The tunnel ending uses whole-word typography, a CSS metal sculpture, real project stills and pointer parallax. Its existing two-gesture scroll gate is preserved. Liquid button decoration is inspired by [Extee Studio’s Venom Button](https://exteestudio.github.io/venom-button/), implemented locally with one shared Canvas 2D surface and delegated pointer handlers. It preserves native click targets and keyboard behavior; playback buttons get a smaller effect, touch gets pressed-state shading, and reduced motion disables the liquid animation. No third-party script is loaded at runtime.

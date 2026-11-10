@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import Header from './components/Header.jsx';
+import Preloader from './components/Preloader.jsx';
+import VenomInteractions from './components/VenomInteractions.jsx';
 import CardTunnel from './components/CardTunnel.jsx';
 import EndingScreen from './components/EndingScreen.jsx';
 import AboutSection from './components/AboutSection.jsx';
@@ -17,6 +19,8 @@ import { DEFAULT_PROJECTS, INITIAL_CARDS, PROJECTS_STORAGE_KEY } from './data/pr
 const TUNNEL_PROJECT_LIMIT = 10;
 
 export default function App() {
+  const [booting, setBooting] = useState(true);
+  const finishBoot = useCallback(() => setBooting(false), []);
   const [projects, setProjects] = useState(() => {
     try {
       const stored = localStorage.getItem(PROJECTS_STORAGE_KEY);
@@ -169,7 +173,7 @@ export default function App() {
       });
     };
     const handleWheel = (e) => {
-      if (activeModalProject || adminOpen || menuOpen) return;
+      if (booting || activeModalProject || adminOpen || menuOpen) return;
       if (e.ctrlKey || e.target.closest('input, textarea, select')) return;
       e.preventDefault();
       const delta = (e.deltaY || e.deltaX) * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? window.innerHeight : 1);
@@ -187,7 +191,7 @@ export default function App() {
     let touchActive = false;
 
     const handleTouchStart = (e) => {
-      if (activeModalProject || adminOpen || menuOpen) return;
+      if (booting || activeModalProject || adminOpen || menuOpen) return;
       if (e.touches.length !== 1 || e.target.closest('input, textarea, select, .color-wipe')) { touchActive = false; return; }
       const video = e.target.closest('video');
       if (video && e.touches[0].clientY > video.getBoundingClientRect().bottom - 48) { touchActive = false; return; }
@@ -238,11 +242,12 @@ export default function App() {
       window.removeEventListener('touchend', handleTouchEnd);
       window.removeEventListener('touchcancel', cancelTouch);
     };
-  }, [totalMaxZ, maxZ, isMobile, activeModalProject, adminOpen, menuOpen, reducedMotion, brandStart]);
+  }, [totalMaxZ, maxZ, isMobile, activeModalProject, adminOpen, menuOpen, reducedMotion, brandStart, booting]);
 
   // Keyboard navigation (legacy: ArrowDown/Right +380, ArrowUp/Left -380, Escape closes modal)
   useEffect(() => {
     const onKey = (e) => {
+      if (booting) return;
       if (e.defaultPrevented || e.target.closest('input, textarea, select, [contenteditable=true]') || adminOpen) return;
       if (activeModalProject && e.key === 'Escape') {
         setActiveModalProject(null);
@@ -275,7 +280,7 @@ export default function App() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [totalMaxZ, activeModalProject, adminOpen, menuOpen, brandStart, maxZ]);
+  }, [totalMaxZ, activeModalProject, adminOpen, menuOpen, brandStart, maxZ, booting]);
 
   // Navigation jumping to exact section offsets
   const handleNavigate = (target) => {
@@ -343,7 +348,8 @@ export default function App() {
 
   return (
     <>
-      <div className="cinema-intro" aria-hidden="true"><span className="intro-brand">DOLLAR CREATIVE LAB<span className="intro-sub">POST PRODUCTION HOUSE</span></span></div>
+      {booting && <Preloader posters={projects.map(project => project.poster)} onComplete={finishBoot}/>}
+      <div id="studioApp" inert={booting ? '' : undefined} aria-hidden={booting ? true : undefined}>
       {/* Header */}
       <Header
         theme={theme}
@@ -358,7 +364,7 @@ export default function App() {
         cards={cards}
         cameraZ={cameraZ}
         maxZ={maxZ}
-        paused={Boolean(activeModalProject) || menuOpen || cameraZ > maxZ}
+        paused={booting || Boolean(activeModalProject) || menuOpen || cameraZ > maxZ}
         onCardClick={(card, element) => {
           if (card.project) openProject(card.project, element);
         }}
@@ -469,6 +475,8 @@ export default function App() {
       {activeModalProject && (
         <VideoModal project={activeModalProject} origin={projectOrigin} onClose={closeProject} />
       )}
+      </div>
+      <VenomInteractions/>
     </>
   );
 }
