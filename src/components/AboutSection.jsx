@@ -20,9 +20,7 @@ const ABOUT_HERO_TOKENS = [
   { text: 'From', bold: false },
   { text: 'our', bold: false },
   { text: 'Cairo', bold: false },
-  { text: '&', bold: false },
-  { text: 'LA', bold: false },
-  { text: 'studios', bold: false },
+  { text: 'studio', bold: false },
   { text: 'and', bold: false },
   { text: 'beyond,', bold: false },
   { text: 'we', bold: false },
@@ -39,7 +37,7 @@ const ABOUT_HERO_TOKENS = [
 
 export default function AboutSection({ onNext, scrollOffset = 0 }) {
   const containerRef = useRef(null);
-  const isInView = useReveal(containerRef, '.cult-eyebrow, .cult-about-subtext, .cult-services-title, .cult-service-card, .cult-quote-banner');
+  const isInView = useReveal(containerRef, '.cult-eyebrow, .cult-about-lead, .cult-about-subtext, .craft-topline, .craft-tabs button, .craft-stage, .craft-scrubber, .craft-description, .footage-attribution, .cult-quote-banner');
   const reduced = useReducedMotion();
   const [revealProgress, setRevealProgress] = useState(0);
 
@@ -83,7 +81,7 @@ export default function AboutSection({ onNext, scrollOffset = 0 }) {
       style={{ perspective: '1200px', transformStyle: 'preserve-3d' }}
     >
       <div id="aboutInner" className="cult-section-inner">
-        <div className="cult-eyebrow" style={{ opacity: 0, transform: 'translateY(25px)' }}>
+        <div className="cult-eyebrow">
           <SplitText type="chars" inView={isInView} stagger={0.03}>
             About Dollar
           </SplitText>
@@ -119,14 +117,14 @@ export default function AboutSection({ onNext, scrollOffset = 0 }) {
             })}
           </h1>
 
-          <p className="cult-about-subtext" style={{ opacity: 0, transform: 'translateY(25px)' }}>
+          <p className="cult-about-subtext">
             Dollar Creative Lab was founded to shape culture through striking visual storytelling. We believe that the future of filmmaking lies in the unbreakable bond between pre-production, on-set vision, and post-production mastery.
           </p>
         </div>
 
         <CraftStudio scrollOffset={scrollOffset} />
 
-        <div className="cult-quote-banner" style={{ opacity: 0, transform: 'translateY(30px) scale(0.97)' }}>
+        <div className="cult-quote-banner">
           <div className="cult-quote-text">
             &quot;We are fascinated with projects that are post-production driven &amp; carry a high artistic appeal — transforming raw footage into enduring cinematic moments.&quot;
           </div>

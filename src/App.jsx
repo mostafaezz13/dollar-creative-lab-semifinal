@@ -10,8 +10,7 @@ import ContactSection from './components/ContactSection.jsx';
 import VideoModal from './components/VideoModal.jsx';
 import AdminModal from './components/AdminModal.jsx';
 import useReducedMotion from './hooks/useReducedMotion.js';
-import FilmPlayer from './components/FilmPlayer.jsx';
-import { parseVimeoUrl } from './utils/vimeo.js';
+import WorkPreview from './components/WorkPreview.jsx';
 import { createEndingGate, advanceEndingGate } from './utils/endingGate.js';
 import { DEFAULT_PROJECTS, INITIAL_CARDS, PROJECTS_STORAGE_KEY } from './data/projects.js';
 
@@ -70,7 +69,6 @@ export default function App() {
 
   // Cursor preview (rendered at body level, z-index 120, like legacy)
   const [hoveredProject, setHoveredProject] = useState(null);
-  const previewRef = useRef(null);
 
   // DOM Refs for dynamic offsets
   const trackRef = useRef(null);
@@ -153,15 +151,6 @@ export default function App() {
       document.body.classList.remove('theme-light');
     }
   }, [theme]);
-
-  // Track global mouse position for the floating cursor preview
-  useEffect(() => {
-    const onMove = (e) => {
-      if (previewRef.current) previewRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`;
-    };
-    window.addEventListener('mousemove', onMove);
-    return () => window.removeEventListener('mousemove', onMove);
-  }, []);
 
   // One arrival gesture stops on the ending; only a fresh gesture continues.
   useEffect(() => {
@@ -338,17 +327,11 @@ export default function App() {
   const isEndingVisible = cameraZ >= ctaThreshold && cameraZ < contentStart;
 
   const isLight = theme === 'light';
-  const showCursorPreview = !!hoveredProject;
-  const previewVisual = hoveredProject?.previewVisual || '';
-  const isVideo = Boolean(parseVimeoUrl(previewVisual)) || previewVisual.startsWith('data:video/') || /\.(mp4|webm|mov)$/i.test(previewVisual);
-  const isImage = previewVisual.startsWith('data:image/') || /\.(jpg|jpeg|png|webp|gif)$/i.test(previewVisual);
-  const monogram =
-    (hoveredProject?.client || 'DL').replace(/[^a-zA-Z0-9]/g, '').slice(0, 2).toUpperCase() || 'DL';
 
   return (
     <>
       {booting && <Preloader posters={projects.map(project => project.poster)} onComplete={finishBoot}/>}
-      <div id="studioApp" inert={booting ? '' : undefined} aria-hidden={booting ? true : undefined}>
+      <div id="studioApp" className={booting ? 'studio-loading' : 'studio-ready'} inert={booting ? '' : undefined} aria-hidden={booting ? true : undefined}>
       {/* Header */}
       <Header
         theme={theme}
@@ -424,36 +407,7 @@ export default function App() {
         </div>
       </div>
 
-      {/* Floating Cursor Preview (body-level, z-index 120) */}
-      <div
-        ref={previewRef}
-        id="cursorPreview"
-        className={`cursor-preview${showCursorPreview ? ' visible' : ''}`}
-        aria-hidden="true"
-        style={{
-          transform: 'translate3d(-9999px, -9999px, 0)'
-        }}
-      >
-        <div className="cursor-preview-bg" />
-        <div className="cursor-preview-media-wrap">
-          {showCursorPreview && isVideo && (
-            <FilmPlayer className="cursor-preview-media" title={hoveredProject.title} source={previewVisual} poster={hoveredProject.poster} background muted loop controls={false} autoplay />
-          )}
-          {showCursorPreview && !isVideo && isImage && (
-            <img className="cursor-preview-media" src={previewVisual} alt="" />
-          )}
-          {showCursorPreview && !isVideo && !isImage && (
-            <div className="cursor-preview-fallback">
-              <div className="fallback-monogram" id="fallbackMonogram">{monogram}</div>
-              <div className="fallback-details">
-                <span className="fallback-client" id="fallbackClient">{hoveredProject.client || 'DOLLAR'}</span>
-                <span className="fallback-title" id="fallbackTitle">{hoveredProject.title || 'PROJECT'}</span>
-              </div>
-            </div>
-          )}
-        </div>
-        <div className="cursor-preview-scanline" />
-      </div>
+      <WorkPreview project={activeModalProject || menuOpen ? null : hoveredProject} projects={projects}/>
 
       {/* Scroll hint — replicated verbatim (legacy ships it as "visible hidden" and
           only ever adds "hidden", so it stays at opacity 0) */}

@@ -5,6 +5,7 @@ import './index.css';
 import './cinematic.css';
 import './studio-effects.css';
 import './brand.css';
+import './motion.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

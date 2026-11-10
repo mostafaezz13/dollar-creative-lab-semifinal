@@ -24,13 +24,13 @@ export function parseVimeoUrl(value) {
   return { id: match[1], hash };
 }
 
-export function vimeoEmbedUrl(value, { muted = false, loop = false, controls = true, background = false } = {}) {
+export function vimeoEmbedUrl(value, { muted = false, loop = false, controls = true, background = false, autoplay = background } = {}) {
   const video = parseVimeoUrl(value);
   if (!video) return '';
   const url = new URL(`https://player.vimeo.com/video/${video.id}`);
   if (video.hash) url.searchParams.set('h', video.hash);
   // Background previews can play together (autopause=0). Main films start after their transition.
-  Object.entries({ autoplay: background ? 1 : 0, autopause: background ? 0 : 1, muted: muted ? 1 : 0, loop: loop ? 1 : 0, controls: !background && controls ? 1 : 0, background: background ? 1 : 0, playsinline: 1, dnt: 1, title: 0, byline: 0, portrait: 0 }).forEach(([key,value]) => url.searchParams.set(key,String(value)));
+  Object.entries({ autoplay: autoplay ? 1 : 0, autopause: background ? 0 : 1, muted: muted ? 1 : 0, loop: loop ? 1 : 0, controls: !background && controls ? 1 : 0, background: background ? 1 : 0, playsinline: 1, dnt: 1, title: 0, byline: 0, portrait: 0 }).forEach(([key,value]) => url.searchParams.set(key,String(value)));
   return url.href;
 }
 

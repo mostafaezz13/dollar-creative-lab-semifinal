@@ -34,7 +34,7 @@ export default function ShowreelSection({
 
   const isInView = useReveal(
     containerRef,
-    '.cult-eyebrow, .cult-showreel-meta',
+    '.cult-eyebrow, .cult-showreel-header, .showreel-custom-viewer, .showreel-description, .cult-showreel-footer > *',
   );
 
   useScrollScene(containerRef, scrollOffset);

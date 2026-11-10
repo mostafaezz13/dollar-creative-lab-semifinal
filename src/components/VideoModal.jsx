@@ -4,6 +4,7 @@ import useDialog from '../hooks/useDialog.js';
 import useReducedMotion from '../hooks/useReducedMotion.js';
 import FilmPlayer from './FilmPlayer.jsx';
 import ProjectControls from './ProjectControls.jsx';
+import MotionDetails from './MotionDetails.jsx';
 import { parseVimeoUrl } from '../utils/vimeo.js';
 import { mediaUrl, safeCredits } from '../utils/content.js';
 
@@ -143,7 +144,7 @@ export default function VideoModal({ project, origin, onClose }) {
         </div>
         {message && <p className="project-player-message" role="status">{message}</p>}
         <section className="project-info"><div><span className="project-overline">{project.year || 'SELECTED WORK'}</span><h2 id="project-dialog-title" aria-label={project.title}>{title}</h2></div><div className="project-meta">{artist && <span>{artist}</span>}<span>{tags.join(' / ')}</span></div></section>
-        {(project.credits || screenshots.length > 0) && <details className="project-credits"><summary>About this project <ChevronDown size={16} strokeWidth={1.4}/></summary><div className="project-credits-body">{project.credits && <div dangerouslySetInnerHTML={{__html:safeCredits(project.credits)}}/>}{screenshots.length>0 && <div className="project-stills">{screenshots.map((src,i)=><img key={i} src={mediaUrl(src)} alt={`${project.title} — still ${i+1}`} loading="lazy"/>)}</div>}</div></details>}
+        {(project.credits || screenshots.length > 0) && <MotionDetails className="project-credits"><summary>About this project <ChevronDown size={16} strokeWidth={1.4}/></summary><div className="project-credits-body">{project.credits && <div dangerouslySetInnerHTML={{__html:safeCredits(project.credits)}}/>}{screenshots.length>0 && <div className="project-stills">{screenshots.map((src,i)=><img key={i} src={mediaUrl(src)} alt={`${project.title} — still ${i+1}`} loading="lazy"/>)}</div>}</div></MotionDetails>}
       </main>
     </div>
   );

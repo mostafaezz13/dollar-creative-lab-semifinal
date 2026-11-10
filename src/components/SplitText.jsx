@@ -7,15 +7,21 @@ export default function SplitText({ children, className = '', style = {}, tag: T
   useLayoutEffect(() => {
     const units = [...(ref.current?.querySelectorAll('.split-unit-inner') || [])];
     const offscreen = `translateY(${yOffset}%) rotateX(${-rotateX}deg)`;
-    if (reduced || !inView) {
-      units.forEach(unit => { unit.style.opacity = reduced ? '1' : '0'; unit.style.transform = reduced ? 'none' : offscreen; });
+    if (reduced) {
+      units.forEach(unit=>{unit.style.opacity='1';unit.style.transform='none';});
       return;
     }
-    const animations = units.map((unit,index) => unit.animate([
-      { transform: offscreen, opacity: 0 },
-      { transform: 'translateY(0%) rotateX(0deg)', opacity: 1 }
-    ], { duration: duration * 1000, delay: (delay + index * stagger) * 1000, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'both' }));
-    return () => animations.forEach(animation => animation.cancel());
+    const animations=units.map((unit,index)=>{
+      const current=getComputedStyle(unit);
+      const to=inView?{transform:'translateY(0%) rotateX(0deg)',opacity:1}:{transform:`translateY(-35%) rotateX(${rotateX*.4}deg)`,opacity:0};
+      // A never-entered title remains below its mask until its first entrance.
+      if(!inView&&current.opacity==='0'){unit.style.transform=offscreen;return null;}
+      return unit.animate([{transform:current.transform,opacity:current.opacity},to],{
+        duration:inView?duration*1000:280,delay:inView?(delay+index*stagger)*1000:Math.min(index,5)*12,
+        easing:inView?'cubic-bezier(.16,1,.3,1)':'cubic-bezier(.4,0,.6,1)',fill:'both'
+      });
+    }).filter(Boolean);
+    return () => {units.forEach(unit=>{const current=getComputedStyle(unit);unit.style.transform=current.transform;unit.style.opacity=current.opacity;});animations.forEach(animation => animation.cancel());};
   }, [children, inView, delay, duration, stagger, yOffset, rotateX, reduced]);
   const unit = (text, key) => <span key={key} className="split-mask"><span className="split-unit-inner" style={{ transform: reduced ? 'none' : `translateY(${yOffset}%) rotateX(${-rotateX}deg)`, opacity: reduced ? 1 : 0 }}>{text}</span></span>;
   return <Tag ref={ref} className={`split-text ${className}`} style={style} aria-label={typeof children === 'string' ? children : undefined}>

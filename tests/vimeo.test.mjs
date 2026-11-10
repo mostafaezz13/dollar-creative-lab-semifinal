@@ -41,3 +41,10 @@ test('background mode always disables native controls and permits parallel previ
   assert.equal(url.searchParams.get('controls'),'0');
   assert.equal(url.searchParams.get('autopause'),'0');
 });
+test('a warm preview can load silently without autoplay or native controls', () => {
+  const url = new URL(vimeoEmbedUrl('https://vimeo.com/123456789/aB12345678', {background:true,muted:true,loop:true,autoplay:false}));
+  assert.equal(url.searchParams.get('autoplay'),'0');
+  assert.equal(url.searchParams.get('autopause'),'0');
+  assert.equal(url.searchParams.get('controls'),'0');
+  assert.equal(url.searchParams.get('h'),'aB12345678');
+});

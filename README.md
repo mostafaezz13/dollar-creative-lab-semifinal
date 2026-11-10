@@ -83,3 +83,9 @@ The palette is defined in `src/brand.css`: Dollar Green `#20D13A`, Deep Violet `
 `BrandLogo` shares the transparent web artwork prepared from the studio-supplied logo reference at `public/brand/dollar-logo.png` across the header, opening loader, tunnel ending and contact footer. Replace this asset with the original transparent master if one becomes available; all placements update together. The image keeps its colors in both themes.
 
 The services are Editing, Color, Sound and Finishing, in that order. Visual panels and audio cleanup use the service name rather than its numeric position so descriptions and interactive studies stay matched.
+
+### Work previews and page motion
+
+Work hover previews prefer the project's actual film URL and play silently from its midpoint. Up to three preview players stay mounted; returning to a cached row resumes its player. Work prepares two likely previews as the archive approaches the viewport. Vimeo is briefly primed while muted to complete the initial seek, then inactive previews pause. Pointer previews stay inside the screen; touch devices open the project directly.
+
+`useReveal` animates elements into and out of the viewport repeatedly, including reverse scrolling and dynamically filtered rows. Independent translate/rotate/scale properties preserve the existing scene transforms. Filters and service tabs animate old content out before replacement; split text, header links, project details and the project manager have matching transitions. Reduced-motion mode keeps content visible and skips the decorative movement.

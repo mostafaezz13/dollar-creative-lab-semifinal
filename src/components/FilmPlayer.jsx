@@ -5,7 +5,7 @@ import { mediaStartTime } from '../utils/mediaPlayback.js';
 import { parseVimeoUrl, vimeoEmbedUrl, isVimeoHost } from '../utils/vimeo.js';
 
 // One lifecycle for native files and Vimeo: play, pause and cleanup are shared by the site.
-const FilmPlayer = forwardRef(function FilmPlayer({ source, title = 'Film', poster = '', autoplay = false, active = true, muted = false, loop = false, controls = true, background = false, preload = 'metadata', aspectRatio = 16/9, startFraction = 0, className = '', id, onPlay, onPause, onError, onReady, onTimeUpdate, onDurationChange, onVolumeChange, onEnded, onBufferStart, onBufferEnd }, ref) {
+const FilmPlayer = forwardRef(function FilmPlayer({ source, title = 'Film', poster = '', autoplay = false, active = true, muted = false, loop = false, controls = true, background = false, preload = 'metadata', aspectRatio = 16/9, startFraction = 0, keepMounted = false, className = '', id, onPlay, onPause, onError, onReady, onTimeUpdate, onDurationChange, onVolumeChange, onEnded, onBufferStart, onBufferEnd }, ref) {
   const nativeRef = useRef(null);
   const hostRef = useRef(null);
   const apiRef = useRef(null);
@@ -16,8 +16,8 @@ const FilmPlayer = forwardRef(function FilmPlayer({ source, title = 'Film', post
   const callbacks = useRef({});
   callbacks.current = { onPlay, onPause, onError, onReady, onTimeUpdate, onDurationChange, onVolumeChange, onEnded, onBufferStart, onBufferEnd };
   const vimeo = parseVimeoUrl(source);
-  const embed = vimeoEmbedUrl(source, { muted, loop, controls, background });
-  const renderEmbed = Boolean(vimeo) && (!background || active);
+  const embed = vimeoEmbedUrl(source, { muted, loop, controls, background, autoplay: background && !keepMounted });
+  const renderEmbed = Boolean(vimeo) && (!background || active || keepMounted);
   const unavailable = !source || (isVimeoHost(source) && !vimeo);
 
   useImperativeHandle(ref, () => ({
@@ -92,6 +92,10 @@ const FilmPlayer = forwardRef(function FilmPlayer({ source, title = 'Film', post
         metadata = { duration, muted: isMuted, volume };
         if (disposed) return;
         const start = mediaStartTime(duration, startFraction);
+        // Vimeo may defer a paused seek until media starts. Prime the muted
+        // warm preview, then pause it again below if it is not selected.
+        if (keepMounted && start > 0) await player.play();
+        if (disposed) return;
         if (start > 0) await player.setCurrentTime(start);
       } catch (error) {
         // A seek can be unavailable for a live/unseekable source. Still allow playback.
@@ -102,6 +106,7 @@ const FilmPlayer = forwardRef(function FilmPlayer({ source, title = 'Film', post
       host.dataset.ready = 'true';
       callbacks.current.onReady?.(metadata);
       if (playback.current.active && (wantsPlay.current || playback.current.autoplay)) player.play().catch(() => {});
+      else if (keepMounted) player.pause().catch(() => {});
     }).catch(error => { if (!disposed) callbacks.current.onError?.(error); });
     return () => {
       disposed = true;
@@ -110,7 +115,7 @@ const FilmPlayer = forwardRef(function FilmPlayer({ source, title = 'Film', post
       player.destroy().catch(() => {});
       iframe.remove();
     };
-  }, [embed, renderEmbed, aspectRatio, startFraction]);
+  }, [embed, renderEmbed, aspectRatio, startFraction, keepMounted]);
 
   useEffect(() => {
     if (!active) {
@@ -126,10 +131,10 @@ const FilmPlayer = forwardRef(function FilmPlayer({ source, title = 'Film', post
 
   if (unavailable) return <div className={`film-player film-placeholder ${className}`} role="status">Film unavailable</div>;
   if (vimeo) {
-    if (background && !active) return poster ? <img className={`film-player film-poster ${className}`} src={mediaUrl(poster)} alt="" /> : <div className={`film-player film-placeholder ${className}`} aria-hidden="true" />;
+    if (background && !active && !keepMounted) return poster ? <img className={`film-player film-poster ${className}`} src={mediaUrl(poster)} alt="" /> : <div className={`film-player film-placeholder ${className}`} aria-hidden="true" />;
     return <div id={id} ref={hostRef} className={`film-player film-vimeo ${className}`} style={poster ? { backgroundImage: `url(${JSON.stringify(mediaUrl(poster))})` } : undefined} />;
   }
-  return <video id={id} ref={nativeRef} className={`film-player film-native ${className}`} src={background && !active ? undefined : mediaUrl(source)} poster={mediaUrl(poster)} playsInline muted={muted} loop={loop} controls={controls} preload={background && !active ? 'none' : preload}
+  return <video id={id} ref={nativeRef} className={`film-player film-native ${className}`} src={background && !active && !keepMounted ? undefined : mediaUrl(source)} poster={mediaUrl(poster)} playsInline muted={muted} loop={loop} controls={controls} preload={background && !active && !keepMounted ? 'none' : preload}
     onPlay={onPlay} onPause={onPause}
     onLoadedMetadata={event => {
       const video = event.currentTarget;

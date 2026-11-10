@@ -1,11 +1,20 @@
 import React, { useState, useMemo, useRef } from 'react';
 import useReveal from '../hooks/useReveal.js';
+import useExitTransition from '../hooks/useExitTransition.js';
 import SplitText from './SplitText.jsx';
 
 export default function WorkSection({ projects, onProjectClick, onBack, onNext, onRowHover, scrollOffset = 0 }) {
   const [activeCategory, setActiveCategory] = useState('ALL');
   const [activeYear, setActiveYear] = useState('ALL');
   const sectionRef = useRef(null);
+  const transition = useExitTransition(sectionRef, '.archive-row');
+  const pendingFilters = useRef({category:'ALL',year:'ALL'});
+  const changeFilters = patch => {
+    onRowHover?.(null);
+    const next={...pendingFilters.current,...patch};
+    pendingFilters.current=next;
+    transition(()=>{setActiveCategory(next.category);setActiveYear(next.year);});
+  };
 
   // Legacy builds CAT/YEAR pills by splitting category on "/" only and
   // collecting years as strings (year list sorted descending numerically).
@@ -42,7 +51,7 @@ export default function WorkSection({ projects, onProjectClick, onBack, onNext, 
     });
   }, [projects, activeCategory, activeYear]);
 
-  const inView = useReveal(sectionRef, '.archive-row', filteredProjects);
+  const inView = useReveal(sectionRef, '.archive-topbar, .archive-filter-col, .archive-row, .archive-footer', filteredProjects);
 
   return (
     <section
@@ -71,7 +80,7 @@ export default function WorkSection({ projects, onProjectClick, onBack, onNext, 
                   type="button"
                   className={`filter-btn${cat === activeCategory ? ' active' : ''}`}
                   aria-pressed={cat === activeCategory}
-                  onClick={() => { onRowHover?.(null); setActiveCategory(cat); }}
+                  onClick={() => { changeFilters({category:cat}); }}
                 >
                   {cat}
                 </button>
@@ -90,7 +99,7 @@ export default function WorkSection({ projects, onProjectClick, onBack, onNext, 
                   type="button"
                   className={`filter-btn${yr === activeYear ? ' active' : ''}`}
                   aria-pressed={yr === activeYear}
-                  onClick={() => { onRowHover?.(null); setActiveYear(yr); }}
+                  onClick={() => { changeFilters({year:yr}); }}
                 >
                   {yr}
                 </button>
@@ -114,10 +123,11 @@ export default function WorkSection({ projects, onProjectClick, onBack, onNext, 
                   aria-label={`Play ${p.client} — ${p.title}`}
                   onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onProjectClick(p, event.currentTarget); } }}
                   onClick={event => { onRowHover?.(null); onProjectClick(p, event.currentTarget); }}
-                  onMouseEnter={() => onRowHover && onRowHover(p)}
-                  onMouseLeave={() => onRowHover && onRowHover(null)}
+                  onPointerEnter={event => { if(event.pointerType!=='touch') onRowHover?.(p); }}
+                  onPointerLeave={() => onRowHover?.(null)}
+                  onFocus={() => onRowHover?.(p)}
+                  onBlur={() => onRowHover?.(null)}
                   style={{
-                    transform: 'translateY(15px)',
                     transformStyle: 'preserve-3d'
                   }}
                 >

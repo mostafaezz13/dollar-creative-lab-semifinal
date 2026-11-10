@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import useExitTransition from '../hooks/useExitTransition.js';
 import useReducedMotion from '../hooks/useReducedMotion.js';
 
 const DISCIPLINES = [
@@ -12,6 +13,7 @@ const FRAME_PATHS = ['/craft-frame-1.jpg', '/craft-frame-2.jpg', '/craft-frame-3
 export default function CraftStudio({ scrollOffset = 0 }) {
   const rootRef = useRef(null);
   const stageRef = useRef(null);
+  const transition = useExitTransition(rootRef, '.craft-visual, .craft-description, .craft-scrubber');
   const audioRef = useRef(null);
   const barsRef = useRef([]);
   const colorVideoRef = useRef(null);
@@ -22,6 +24,7 @@ export default function CraftStudio({ scrollOffset = 0 }) {
   const [format, setFormat] = useState('16:9');
   const reduced = useReducedMotion();
   const [active, setActive] = useState(0);
+  const pendingTab=useRef(0);
   const [progress, setProgress] = useState(.55);
   const [playing, setPlaying] = useState(false);
   const [audioError, setAudioError] = useState('');
@@ -120,11 +123,16 @@ export default function CraftStudio({ scrollOffset = 0 }) {
       setAudioError('Audio could not start in this browser. Please try again.');
     }
   };
-  const select = index => { colorStartRef.current = scrollOffset; setActive(index); setProgress(index === 1 ? 0 : .5); setAudioError(''); setVideoError(''); };
+  const select = index => {
+    if(index===active&&index===pendingTab.current)return;
+    pendingTab.current=index;
+    stopSound();
+    transition(()=>{colorStartRef.current = scrollOffset; setActive(index); setProgress(index === 1 ? 0 : .5); setAudioError(''); setVideoError('');});
+  };
   const onTabKey = event => {
     let next;
-    if (event.key === 'ArrowRight') next = (active + 1) % 4;
-    if (event.key === 'ArrowLeft') next = (active + 3) % 4;
+    if (event.key === 'ArrowRight') next = (pendingTab.current + 1) % 4;
+    if (event.key === 'ArrowLeft') next = (pendingTab.current + 3) % 4;
     if (event.key === 'Home') next = 0;
     if (event.key === 'End') next = 3;
     if (next === undefined) return;
@@ -163,10 +171,10 @@ export default function CraftStudio({ scrollOffset = 0 }) {
           <div className="craft-corner top-left" aria-hidden="true"/><div className="craft-corner bottom-right" aria-hidden="true"/>
           <span className="craft-stage-number" aria-hidden="true">0{active + 1}</span>
         </div>
-        {item.name !== 'SOUND' && <div className="craft-scrubber"><span>{item.a}</span><input type="range" min="0" max="100" value={Math.round(progress * 100)} aria-label={item.instruction} onChange={event => { const next = Number(event.target.value) / 100; if (item.name === 'COLOR') colorStartRef.current = scrollOffset - next * 480; setProgress(next); }} /><span>{item.b}</span></div>}
+        {item.name !== 'SOUND' && <div className="craft-scrubber" key={`scrubber-${active}`}><span>{item.a}</span><input type="range" min="0" max="100" value={Math.round(progress * 100)} aria-label={item.instruction} onChange={event => { const next = Number(event.target.value) / 100; if (item.name === 'COLOR') colorStartRef.current = scrollOffset - next * 480; setProgress(next); }} /><span>{item.b}</span></div>}
         {item.name === 'COLOR' && <p className="footage-attribution">Demo excerpt: <a href="https://mango.blender.org/" target="_blank" rel="noreferrer">Tears of Steel</a> · © Blender Foundation / Ian Hubert · <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noreferrer">CC BY 3.0</a> · Log-look treatment added for this preview.</p>}
         {videoError && <p className="media-error" role="status">{videoError}</p>}
-        <div className="craft-description"><div><span className="craft-instruction">{item.instruction} ↗</span><h3>{item.heading}</h3></div><p>{item.detail}</p></div>
+        <div className="craft-description" key={`description-${active}`}><div><span className="craft-instruction">{item.instruction} ↗</span><h3>{item.heading}</h3></div><p>{item.detail}</p></div>
         {audioError && <p role="status" className="media-error">{audioError}</p>}
       </div>
     </div>

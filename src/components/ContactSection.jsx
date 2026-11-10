@@ -8,7 +8,7 @@ import useReducedMotion from '../hooks/useReducedMotion.js';
 export default function ContactSection({ onBack, onScrollTop, scrollOffset = 0 }) {
   const containerRef = useRef(null);
   const reduced = useReducedMotion();
-  const inView = useReveal(containerRef, '.cult-eyebrow, .cult-contact-main-heading, .cult-contact-card');
+  const inView = useReveal(containerRef, '.cult-eyebrow, .contact-chapter, .cult-contact-main-heading, .contact-intro, .contact-project-link, .contact-card-index, .cult-contact-meta-group, .cult-social-link, .contact-marquee, .contact-brand-signature');
   useScrollScene(containerRef, scrollOffset);
   const tilt = event => {
     if (reduced || event.pointerType === 'touch') return;
