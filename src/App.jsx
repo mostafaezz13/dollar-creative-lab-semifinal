@@ -14,6 +14,8 @@ import { parseVimeoUrl } from './utils/vimeo.js';
 import { createEndingGate, advanceEndingGate } from './utils/endingGate.js';
 import { DEFAULT_PROJECTS, INITIAL_CARDS, PROJECTS_STORAGE_KEY } from './data/projects.js';
 
+const TUNNEL_PROJECT_LIMIT = 10;
+
 export default function App() {
   const [projects, setProjects] = useState(() => {
     try {
@@ -473,7 +475,7 @@ export default function App() {
 
 // Helper hook to map projects data to initial 3D card layout
 function useMemoCards(initialCards, projects) {
-  return React.useMemo(() => projects.map((project, index) => {
+  return React.useMemo(() => projects.slice(0, TUNNEL_PROJECT_LIMIT).map((project, index) => {
     const layout = initialCards[index] || {
       ...initialCards[index % initialCards.length],
       z: initialCards.at(-1).z - (index - initialCards.length + 1) * 550

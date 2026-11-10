@@ -31,7 +31,7 @@ The production output is `dist/`. On Vercel or Netlify, select Vite, use `npm ru
 
 ## Current behavior
 
-- Pointer-controlled 3D project tunnel with projected click targets for all 15 frames and full-screen film transitions. Card media retain their original colors.
+- Pointer-controlled 3D project tunnel with projected click targets for the first 10 projects and full-screen film transitions. Card media retain their original colors.
 - Editing, Color, Finishing and Sound studies.
 - Scroll-controlled simulated log-look to graded video treatment.
 - Animated showreel, contact and studio-name sections. Arriving at the studio ending consumes the current wheel/touch gesture; a fresh gesture continues to the next chapter.
@@ -68,4 +68,4 @@ Private/unlisted films not exposed on the public profile need their complete sha
 
 Run `python scripts/import-vimeo.py` to refresh the studio's public titles, descriptions, upload-year metadata, and bundled JPEG posters. The importer checks the account owner ID and stops rather than silently truncating a full legacy API catalogue. Unlisted videos absent from the public profile require explicit share URLs.
 
-All catalogue films get tunnel cards and archive rows. The local manager now uses `dollar_projects_vimeo_v1`; the previous `dollar_projects_v2` key is retained without deletion so old demo edits cannot override the imported catalogue. The Color study remains the separately attributed illustrative log-look exercise described in `MEDIA-CREDITS.md`.
+The first 10 projects appear in the opening tunnel; all 27 catalogue films remain in the project archive. The ending depth follows the displayed cards rather than the full catalogue. The local manager now uses `dollar_projects_vimeo_v1`; the previous `dollar_projects_v2` key is retained without deletion so old demo edits cannot override the imported catalogue. The Color study remains the separately attributed illustrative log-look exercise described in `MEDIA-CREDITS.md`.

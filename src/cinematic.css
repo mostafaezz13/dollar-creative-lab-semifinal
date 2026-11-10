@@ -300,3 +300,7 @@ body, body.theme-light, .page-content-track, .page-content-track.theme-light { b
 .reel-scroll-surface .cult-showreel-play-toggle { pointer-events:none; opacity:1; }
 .reel-scroll-surface[aria-pressed="true"] .cult-showreel-play-toggle { opacity:0; }
 .reel-scroll-surface:hover .cult-showreel-play-toggle, .reel-scroll-surface:focus-visible .cult-showreel-play-toggle { opacity:1; }
+
+/* The archive's transparent perspective planes do not own project clicks. */
+#archiveSection .archive-list-wrap, #archiveSection .archive-project-list { pointer-events:none; }
+#archiveSection .archive-row { pointer-events:auto; }

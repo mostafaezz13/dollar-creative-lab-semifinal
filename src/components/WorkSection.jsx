@@ -122,7 +122,7 @@ export default function WorkSection({ projects, onProjectClick, onBack, onNext, 
                   onMouseEnter={() => onRowHover && onRowHover(p)}
                   onMouseLeave={() => onRowHover && onRowHover(null)}
                   style={{
-                    transform: 'translateY(15px) translateZ(-20px)',
+                    transform: 'translateY(15px)',
                     transformStyle: 'preserve-3d'
                   }}
                 >
