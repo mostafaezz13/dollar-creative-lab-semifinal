@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node tests/endingGate.test.mjs && node tests/vimeo.test.mjs && node tests/catalogue.test.mjs"
+    "test": "node tests/endingGate.test.mjs && node tests/vimeo.test.mjs && node tests/catalogue.test.mjs && node tests/mediaPlayback.test.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

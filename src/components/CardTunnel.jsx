@@ -104,12 +104,6 @@ export default function CardTunnel({ cards, cameraZ, maxZ, onCardClick, paused =
   const convergeStart = -2000;
   const convergeEnd = 0;
   const exitStart = 650;
-  const previewIndex = cards.reduce((best,card,index) => {
-    const relative = card.z * zStretch + cameraZ;
-    if (relative < -1200 || relative > 1250) return best;
-    const distance = Math.abs(relative - 300);
-    return !best || distance < best.distance ? { index, distance } : best;
-  }, null)?.index ?? -1;
 
   return (
     <>
@@ -218,8 +212,7 @@ export default function CardTunnel({ cards, cameraZ, maxZ, onCardClick, paused =
                 source={card.project?.videoUrl || PLACEHOLDER_VIDEO}
                 title={`${card.sub} — ${card.title}`}
                 background muted loop controls={false}
-                autoplay={!reducedMotion}
-                active={isVisible && i === previewIndex && !reducedMotion && !paused}
+                autoplay active startFraction={0.5}
                 poster={card.project?.poster || ''}
                 aspectRatio={card.project?.width && card.project?.height ? card.project.width / card.project.height : 16/9}
               />

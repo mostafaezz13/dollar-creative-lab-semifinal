@@ -1,14 +1,16 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import Player from '@vimeo/player';
 import { mediaUrl } from '../utils/content.js';
+import { mediaStartTime } from '../utils/mediaPlayback.js';
 import { parseVimeoUrl, vimeoEmbedUrl, isVimeoHost } from '../utils/vimeo.js';
 
 // One lifecycle for native files and Vimeo: play, pause and cleanup are shared by the site.
-const FilmPlayer = forwardRef(function FilmPlayer({ source, title = 'Film', poster = '', autoplay = false, active = true, muted = false, loop = false, controls = true, background = false, preload = 'metadata', aspectRatio = 16/9, className = '', id, onPlay, onPause, onError, onReady, onTimeUpdate, onDurationChange, onVolumeChange, onEnded, onBufferStart, onBufferEnd }, ref) {
+const FilmPlayer = forwardRef(function FilmPlayer({ source, title = 'Film', poster = '', autoplay = false, active = true, muted = false, loop = false, controls = true, background = false, preload = 'metadata', aspectRatio = 16/9, startFraction = 0, className = '', id, onPlay, onPause, onError, onReady, onTimeUpdate, onDurationChange, onVolumeChange, onEnded, onBufferStart, onBufferEnd }, ref) {
   const nativeRef = useRef(null);
   const hostRef = useRef(null);
   const apiRef = useRef(null);
   const wantsPlay = useRef(false);
+  const prepared = useRef(false);
   const playback = useRef({});
   playback.current = { autoplay, active };
   const callbacks = useRef({});
@@ -21,7 +23,7 @@ const FilmPlayer = forwardRef(function FilmPlayer({ source, title = 'Film', post
   useImperativeHandle(ref, () => ({
     play: async () => {
       wantsPlay.current = true;
-      if (apiRef.current) return apiRef.current.play();
+      if (apiRef.current) { if (prepared.current) return apiRef.current.play(); return; }
       if (nativeRef.current) return nativeRef.current.play();
     },
     pause: async () => {
@@ -52,6 +54,7 @@ const FilmPlayer = forwardRef(function FilmPlayer({ source, title = 'Film', post
     if (!renderEmbed || !hostRef.current) return;
     const host = hostRef.current;
     host.dataset.ready = 'false';
+    prepared.current = false;
     let disposed = false;
     const iframe = document.createElement('iframe');
     iframe.src = embed;
@@ -81,22 +84,33 @@ const FilmPlayer = forwardRef(function FilmPlayer({ source, title = 'Film', post
     player.on('bufferstart', () => { if (!disposed) callbacks.current.onBufferStart?.(); });
     player.on('bufferend', () => { if (!disposed) callbacks.current.onBufferEnd?.(); });
     player.on('error', error => { if (!disposed) callbacks.current.onError?.(error); });
-    player.ready().then(() => {
+    player.ready().then(async () => {
       if (disposed) return;
+      let metadata = {};
+      try {
+        const [duration, isMuted, volume] = await Promise.all([player.getDuration(), player.getMuted(), player.getVolume()]);
+        metadata = { duration, muted: isMuted, volume };
+        if (disposed) return;
+        const start = mediaStartTime(duration, startFraction);
+        if (start > 0) await player.setCurrentTime(start);
+      } catch (error) {
+        // A seek can be unavailable for a live/unseekable source. Still allow playback.
+        if (disposed) return;
+      }
+      if (disposed) return;
+      prepared.current = true;
       host.dataset.ready = 'true';
-      Promise.all([player.getDuration(), player.getMuted(), player.getVolume()]).then(([duration, isMuted, volume]) => {
-        if (!disposed) callbacks.current.onReady?.({ duration, muted: isMuted, volume });
-      }).catch(() => { if (!disposed) callbacks.current.onReady?.({}); });
-      if (wantsPlay.current || (playback.current.autoplay && playback.current.active)) player.play().catch(() => {});
+      callbacks.current.onReady?.(metadata);
+      if (playback.current.active && (wantsPlay.current || playback.current.autoplay)) player.play().catch(() => {});
     }).catch(error => { if (!disposed) callbacks.current.onError?.(error); });
     return () => {
       disposed = true;
       observer?.disconnect();
-      if (apiRef.current === player) apiRef.current = null;
+      if (apiRef.current === player) { apiRef.current = null; prepared.current = false; }
       player.destroy().catch(() => {});
       iframe.remove();
     };
-  }, [embed, renderEmbed, aspectRatio]);
+  }, [embed, renderEmbed, aspectRatio, startFraction]);
 
   useEffect(() => {
     if (!active) {
@@ -105,7 +119,7 @@ const FilmPlayer = forwardRef(function FilmPlayer({ source, title = 'Film', post
       nativeRef.current?.pause();
     } else if (autoplay) {
       wantsPlay.current = true;
-      const promise = apiRef.current ? apiRef.current.play() : nativeRef.current?.play();
+      const promise = apiRef.current ? (prepared.current ? apiRef.current.play() : undefined) : nativeRef.current?.play();
       promise?.catch(() => {});
     }
   }, [source, active, autoplay]);
@@ -117,7 +131,12 @@ const FilmPlayer = forwardRef(function FilmPlayer({ source, title = 'Film', post
   }
   return <video id={id} ref={nativeRef} className={`film-player film-native ${className}`} src={background && !active ? undefined : mediaUrl(source)} poster={mediaUrl(poster)} playsInline muted={muted} loop={loop} controls={controls} preload={background && !active ? 'none' : preload}
     onPlay={onPlay} onPause={onPause}
-    onLoadedMetadata={event => onReady?.({ duration: event.currentTarget.duration, muted: event.currentTarget.muted, volume: event.currentTarget.volume })}
+    onLoadedMetadata={event => {
+      const video = event.currentTarget;
+      const start = mediaStartTime(video.duration, startFraction);
+      if (start > 0) video.currentTime = start;
+      onReady?.({ duration: video.duration, muted: video.muted, volume: video.volume });
+    }}
     onTimeUpdate={event => onTimeUpdate?.({ seconds: event.currentTarget.currentTime, duration: event.currentTarget.duration })}
     onDurationChange={event => onDurationChange?.(event.currentTarget.duration)}
     onVolumeChange={event => onVolumeChange?.({ volume: event.currentTarget.volume, muted: event.currentTarget.muted })}

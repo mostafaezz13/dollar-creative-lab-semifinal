@@ -60,7 +60,7 @@ poster: 'https://your-image-host.example/project-poster.jpg'
 
 Change the studio reel in `src/data/showreel.js`. The real account catalogue is in `src/data/vimeo-projects.json`; the owner-selected reel is **SELECTED BRAND WORK** (Vimeo ID `1237014270`). Setting a Vimeo URL in the local project manager changes only that browser; change the source data and push it for shared publication.
 
-Only the single nearest eligible card loads a moving Vimeo preview; distant cards use the project's poster or a neutral placeholder. Project films use the site's own play/pause, seek, mute, volume and fullscreen controls; Vimeo's native controls are disabled. The project title appears once below the film, with credits in a collapsed About panel. Closing a project and leaving the showreel pause playback. Vimeo-backed HTML exports require Internet access for the Vimeo player and video streams.
+All ten tunnel films load together, start halfway through their actual duration, and loop silently. Their players stay mounted and playing when cards move out of view or a project opens; scrolling and camera motion do not restart them. Vimeo autopause is disabled for background previews. Project films use the site's own play/pause, seek, mute, volume and fullscreen controls; Vimeo's native controls are disabled. The project title appears once below the film, with credits in a collapsed About panel. Closing a project and leaving the showreel pause playback. Vimeo-backed HTML exports require Internet access for the Vimeo player and video streams.
 
 Private/unlisted films not exposed on the public profile need their complete share URLs. No Vimeo access token belongs in this frontend.
 
