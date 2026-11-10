@@ -75,3 +75,11 @@ The first 10 projects appear in the opening tunnel; all 27 catalogue films remai
 The opening sequence preloads fonts and the first three local posters, then reveals the tunnel with a split shutter. Video loading never blocks entry; a five-second asset deadline also prevents a stalled request from trapping visitors. Reduced-motion visitors get a short, static transition.
 
 The tunnel ending uses whole-word typography, a CSS metal sculpture, real project stills and pointer parallax. Its existing two-gesture scroll gate is preserved. Liquid button decoration is inspired by [Extee Studio’s Venom Button](https://exteestudio.github.io/venom-button/), implemented locally with one shared Canvas 2D surface and delegated pointer handlers. It preserves native click targets and keyboard behavior; playback buttons get a smaller effect, touch gets pressed-state shading, and reduced motion disables the liquid animation. No third-party script is loaded at runtime.
+
+### Brand identity
+
+The palette is defined in `src/brand.css`: Dollar Green `#20D13A`, Deep Violet `#24005A`, Near Black `#08080B`, Soft White `#F5F3F7`, and Acid Lime `#B7FF5A`. Green is the primary action color; violet adds depth, and lime is reserved for small highlights. The archive retains its animated light surface.
+
+`BrandLogo` shares the transparent web artwork prepared from the studio-supplied logo reference at `public/brand/dollar-logo.png` across the header, opening loader, tunnel ending and contact footer. Replace this asset with the original transparent master if one becomes available; all placements update together. The image keeps its colors in both themes.
+
+The services are Editing, Color, Sound and Finishing, in that order. Visual panels and audio cleanup use the service name rather than its numeric position so descriptions and interactive studies stay matched.

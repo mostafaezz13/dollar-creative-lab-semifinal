@@ -4,6 +4,7 @@ import App from './App.jsx';
 import './index.css';
 import './cinematic.css';
 import './studio-effects.css';
+import './brand.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

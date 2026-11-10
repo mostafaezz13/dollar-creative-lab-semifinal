@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import BrandLogo from './BrandLogo.jsx';
 
 export default function Header({ theme = 'dark', onNavigate, menuOpen = false, onToggleMenu, onAdmin }) {
   const isLight = theme === 'light';
@@ -38,8 +39,7 @@ export default function Header({ theme = 'dark', onNavigate, menuOpen = false, o
         className="site-logo"
         aria-label="Dollar Creative Lab"
       >
-        <span className="logo-main">DOLLAR</span>
-        <span className="logo-sub">CREATIVE LAB</span>
+        <BrandLogo decorative eager />
       </a>
 
       <nav id="siteNav" className={menuOpen ? 'open' : ''} aria-label="Primary navigation">

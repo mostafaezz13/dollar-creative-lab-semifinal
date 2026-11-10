@@ -464,7 +464,7 @@ export default function App() {
         id="progressBar"
         style={{
           width: `${Math.min(100, (cameraZ / totalMaxZ) * 100)}%`,
-          backgroundColor: isLight ? 'rgba(0, 0, 0, 0.25)' : 'rgba(255, 255, 255, 0.25)',
+          backgroundColor: isLight ? 'rgba(8, 8, 11, 0.25)' : 'rgba(245, 243, 247, 0.25)',
           transition: 'background-color 1.2s ease'
         }}
       />

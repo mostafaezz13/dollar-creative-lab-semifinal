@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import BrandLogo from './BrandLogo.jsx';
 import useReveal from '../hooks/useReveal.js';
 import SplitText from './SplitText.jsx';
 import useScrollScene from '../hooks/useScrollScene.js';
@@ -35,7 +36,7 @@ export default function ContactSection({ onBack, onScrollTop, scrollOffset = 0 }
           </div></div>
         </div>
         <div className="contact-marquee" aria-hidden="true"><div>{[0,1,2,3].map(i=><span key={i}>GOOD STORIES DESERVE A GREAT FINISH. <em>LET’S TALK ↗</em> </span>)}</div></div>
-        <div className="cult-contact-footer"><span>© {new Date().getFullYear()} DOLLAR CREATIVE LAB</span></div>
+        <div className="cult-contact-footer"><div className="contact-brand-signature"><BrandLogo/><span>© {new Date().getFullYear()} DOLLAR CREATIVE LAB</span></div></div>
       </div>
     </section>
   );

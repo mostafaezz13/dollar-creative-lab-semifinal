@@ -105,10 +105,10 @@ export default function AboutSection({ onNext, scrollOffset = 0 }) {
                   key={index}
                   className="inline-block mr-[0.28em]"
                   style={{
-                    color: isLit ? '#ffffff' : 'rgba(255, 255, 255, 0.25)',
+                    color: isLit ? 'var(--soft-white)' : 'rgba(245, 243, 247, 0.25)',
                     opacity: wordOpacity,
                     transform: isLit ? 'translateY(0) scale(1)' : 'translateY(16px) rotateX(-12deg) scale(0.97)',
-                    textShadow: isLit ? '0 0 18px rgba(255,255,255,0.3)' : 'none',
+                    textShadow: isLit ? '0 0 18px rgba(245,243,247,0.3)' : 'none',
                     transition: 'color 0.45s ease, opacity 0.45s ease, transform 0.45s ease, text-shadow 0.45s ease',
                     display: 'inline-block'
                   }}

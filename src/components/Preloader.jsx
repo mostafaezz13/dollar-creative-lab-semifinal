@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import BrandLogo from './BrandLogo.jsx';
 import useReducedMotion from '../hooks/useReducedMotion.js';
 
 // Only the opening artwork and fonts gate entry. Remote video never blocks it.
@@ -11,10 +12,10 @@ export default function Preloader({ posters, onComplete }) {
     let disposed = false, frame, exitTimer, completed = 0, target = 0, shown = 0;
     const images = [];
     const started = performance.now();
-    const tasks = initialPosters.current.length + 1;
+    const tasks = initialPosters.current.length + 2;
     const advance = () => { if (!disposed) { completed++; target = completed / tasks * 100; } };
     Promise.resolve(document.fonts?.ready).then(advance, advance);
-    initialPosters.current.forEach(source => {
+    ['/brand/dollar-logo.png', ...initialPosters.current].forEach(source => {
       const image = new Image();
       images.push(image);
       image.onload = image.onerror = advance;
@@ -49,7 +50,7 @@ export default function Preloader({ posters, onComplete }) {
         <div className="preload-center">
           <div className="preload-reel" aria-hidden="true"><i/><i/><i/><span>$</span></div>
           <span className="preload-eyebrow">BEFORE THE FIRST FRAME</span>
-          <div className="preload-word" aria-hidden="true">{'DOLLAR'.split('').map((letter,index)=><span key={index} style={{'--letter':index}}>{letter}</span>)}</div>
+          <div className="preload-word preload-brand-word" aria-hidden="true"><BrandLogo decorative eager className="brand-logo-hero"/></div>
           <div className="preload-disciplines"><span>EDITING</span><i/><span>COLORING</span><i/><span>SOUND</span><i/><span>FINISHING</span></div>
         </div>
         <div className="preload-bottomline"><span>{progress===100 ? 'THE STAGE IS YOURS' : 'PREPARING THE FIRST FRAME'}<small>FONTS / OPENING ARTWORK</small></span><span className="preload-counter">{String(progress).padStart(3,'0')}<small>%</small></span></div>

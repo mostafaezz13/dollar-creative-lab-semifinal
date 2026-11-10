@@ -4,8 +4,8 @@ import useReducedMotion from '../hooks/useReducedMotion.js';
 const DISCIPLINES = [
   { name: 'EDITING', heading: 'Find the rhythm.', detail: 'Every cut changes the story. Scrub through a sequence of frames and watch the picture break apart, then resolve.', instruction: 'SCRUB THE CUT', a: 'DECONSTRUCT', b: 'RESOLVE' },
   { name: 'COLOR', heading: 'From log look to final.', detail: 'Scroll to build contrast and color in a moving cinematic shot. The flat log look is a demonstration treatment, not original camera LOG.', instruction: 'SCROLL TO DEVELOP THE GRADE', a: 'LOG LOOK', b: 'FINAL GRADE' },
-  { name: 'SOUND', heading: 'Feel every frequency.', detail: 'A six-second synthesized sonic study. Start the sound and watch the spectrum react to the audio in real time.', instruction: 'PLAY THE SONIC STUDY', a: '58 HZ', b: 'IMMERSIVE / STEREO' },
-  { name: 'FINISHING', heading: 'Ready for every screen.', detail: 'Online finishing, safe areas and delivery formats. Explore how a finished frame is prepared for widescreen, square and vertical delivery.', instruction: 'EXPLORE THE DELIVERY FORMATS', a: 'CONFORM', b: 'DELIVERY READY' }
+  { name: 'SOUND', heading: 'Feel every frequency.', detail: 'Sound design, dialogue cleanup and a balanced final mix. We give every cut depth, clarity and impact.', instruction: 'PLAY THE SONIC STUDY', a: '58 HZ', b: 'IMMERSIVE / STEREO' },
+  { name: 'FINISHING', heading: 'Ready for every screen.', detail: 'The final polish before delivery: conform, quality control and mastering for every screen and format.', instruction: 'EXPLORE THE DELIVERY FORMATS', a: 'CONFORM', b: 'DELIVERY READY' }
 ];
 const FRAME_PATHS = ['/craft-frame-1.jpg', '/craft-frame-2.jpg', '/craft-frame-3.jpg', '/craft-frame-4.jpg', '/craft-frame-5.jpg'];
 
@@ -43,22 +43,22 @@ export default function CraftStudio({ scrollOffset = 0 }) {
     observer.observe(rootRef.current);
     return () => observer.disconnect();
   }, []);
-  useEffect(() => { if (active !== 3 || !visible) stopSound(); }, [active, visible, stopSound]);
+  useEffect(() => { if (item.name !== 'SOUND' || !visible) stopSound(); }, [item.name, visible, stopSound]);
   useEffect(() => {
     const hide = () => { if (document.hidden) stopSound(); };
     document.addEventListener('visibilitychange', hide);
     return () => { document.removeEventListener('visibilitychange', hide); stopSound(); };
   }, [stopSound]);
   useEffect(() => {
-    if (!visible || reduced || active === 3) return;
-    if (active === 1) {
+    if (!visible || reduced || item.name === 'SOUND') return;
+    if (item.name === 'COLOR') {
       setProgress(Math.max(0, Math.min(1, (scrollOffset - colorStartRef.current) / 480)));
       return;
     }
     const rect = stageRef.current.getBoundingClientRect();
     const next = Math.max(0, Math.min(1, (window.innerHeight * .72 - rect.top) / (window.innerHeight * .6)));
     setProgress(next);
-  }, [scrollOffset, visible, reduced]);
+  }, [scrollOffset, visible, reduced, item.name]);
 
   useEffect(() => {
     [colorVideoRef.current, finishingVideoRef.current].forEach(video => {
@@ -141,14 +141,14 @@ export default function CraftStudio({ scrollOffset = 0 }) {
       <div id="craft-panel" role="tabpanel" aria-labelledby={`craft-tab-${active}`}>
         <div ref={stageRef} className={`craft-stage craft-${item.name.toLowerCase()}${visible ? ' is-visible' : ''}${reduced ? ' motion-reduced' : ''}`} style={{ '--craft-progress': progress, '--craft-percent': `${progress * 100}%` }}>
           <div className="craft-visual" key={active}>
-            {active === 0 && <><div className="edit-strips" aria-hidden="true">{FRAME_PATHS.map((src, index) => <div key={src} style={{ '--strip-index': index, transform: `translate3d(${(1 - progress) * (index % 2 ? 90 : -90)}px, ${(1 - progress) * (index - 2) * 32}px, ${(1 - progress) * -index * 100}px) rotateY(${(1 - progress) * (index - 2) * 14}deg)` }}><img src={progress > .92 ? FRAME_PATHS[2] : src} alt="" style={{ objectPosition: `${index * 25}% center` }} /><span>0{index + 1}</span></div>)}</div><div className="edit-timecode" aria-hidden="true">00:00:{String(Math.floor(progress * 24)).padStart(2, '0')}:<span>{String(Math.floor(progress * 96) % 24).padStart(2, '0')}</span></div></>}
-            {active === 1 && <>
+            {item.name === 'EDITING' && <><div className="edit-strips" aria-hidden="true">{FRAME_PATHS.map((src, index) => <div key={src} style={{ '--strip-index': index, transform: `translate3d(${(1 - progress) * (index % 2 ? 90 : -90)}px, ${(1 - progress) * (index - 2) * 32}px, ${(1 - progress) * -index * 100}px) rotateY(${(1 - progress) * (index - 2) * 14}deg)` }}><img src={progress > .92 ? FRAME_PATHS[2] : src} alt="" style={{ objectPosition: `${index * 25}% center` }} /><span>0{index + 1}</span></div>)}</div><div className="edit-timecode" aria-hidden="true">00:00:{String(Math.floor(progress * 24)).padStart(2, '0')}:<span>{String(Math.floor(progress * 96) % 24).padStart(2, '0')}</span></div></>}
+            {item.name === 'COLOR' && <>
               <video className="color-study-video" ref={colorVideoRef} src="/color-study.mp4" muted loop playsInline preload="metadata" onPlay={() => setColorPlaying(true)} onPause={() => setColorPlaying(false)} onError={() => setVideoError('The color study could not load.')} style={{ filter: `saturate(${.18 + progress * .82}) contrast(${.62 + progress * .38}) brightness(${1.16 - progress * .16})` }} />
               <div className="color-state-label"><span>{progress < .08 ? 'LOG LOOK' : progress > .92 ? 'FINAL GRADE' : 'DEVELOPING COLOR'}</span><strong>{Math.round(progress * 100)}%</strong></div>
               <button className="color-video-toggle" onClick={toggleColor} aria-label={colorPlaying ? 'Pause color study' : 'Play color study'}>{colorPlaying ? 'Ⅱ PAUSE' : '▶ PLAY'}</button>
               <div className="grade-progress-track" aria-hidden="true"><i style={{transform:`scaleX(${progress})`}}/></div>
             </>}
-            {active === 2 && <div className="finishing-study">
+            {item.name === 'FINISHING' && <div className="finishing-study">
               <div className="finishing-monitor" style={{ aspectRatio: format.replace(':','/'), transform: reduced ? 'none' : `rotateY(${(1-progress)*-9}deg) rotateX(${(1-progress)*5}deg)` }}>
                 <video ref={finishingVideoRef} src="/color-study.mp4" muted loop playsInline autoPlay={visible && !reduced} preload="metadata" />
                 <div className="delivery-safe-area" aria-hidden="true"><span>TITLE SAFE / 80%</span></div>
@@ -158,13 +158,13 @@ export default function CraftStudio({ scrollOffset = 0 }) {
               <div className="delivery-formats" role="group" aria-label="Delivery format">{['16:9','1:1','9:16'].map(ratio=><button key={ratio} onClick={()=>setFormat(ratio)} aria-pressed={format===ratio}>{ratio}</button>)}</div>
               <span className="finishing-caption">CONFORM / QUALITY CONTROL / DELIVERY</span>
             </div>}
-            {active === 3 && <div className={`sonic-study${playing ? ' playing' : ''}`}><div className="sonic-ring" aria-hidden="true"/><div className="sonic-spectrum" aria-hidden="true">{Array.from({ length: 56 }, (_, i) => <i key={i} ref={el => barsRef.current[i] = el} style={{ transform: `scaleY(${.08 + Math.pow(Math.sin(i * .39), 2) * .28})` }} />)}</div><button className="sonic-play" aria-label={playing ? 'Stop sonic study' : 'Play sonic study'} aria-pressed={playing} onClick={playSound}>{playing ? 'Ⅱ' : '▶'}<span>{playing ? 'STOP SOUND' : 'PLAY SOUND'}</span></button><span className="sonic-caption">SYNTHESIZED STUDY / 06 SEC</span></div>}
+            {item.name === 'SOUND' && <div className={`sonic-study${playing ? ' playing' : ''}`}><div className="sonic-ring" aria-hidden="true"/><div className="sonic-spectrum" aria-hidden="true">{Array.from({ length: 56 }, (_, i) => <i key={i} ref={el => barsRef.current[i] = el} style={{ transform: `scaleY(${.08 + Math.pow(Math.sin(i * .39), 2) * .28})` }} />)}</div><button className="sonic-play" aria-label={playing ? 'Stop sonic study' : 'Play sonic study'} aria-pressed={playing} onClick={playSound}>{playing ? 'Ⅱ' : '▶'}<span>{playing ? 'STOP SOUND' : 'PLAY SOUND'}</span></button><span className="sonic-caption">SYNTHESIZED STUDY / 06 SEC</span></div>}
           </div>
           <div className="craft-corner top-left" aria-hidden="true"/><div className="craft-corner bottom-right" aria-hidden="true"/>
           <span className="craft-stage-number" aria-hidden="true">0{active + 1}</span>
         </div>
-        {active !== 3 && <div className="craft-scrubber"><span>{item.a}</span><input type="range" min="0" max="100" value={Math.round(progress * 100)} aria-label={item.instruction} onChange={event => { const next = Number(event.target.value) / 100; if (active === 1) colorStartRef.current = scrollOffset - next * 480; setProgress(next); }} /><span>{item.b}</span></div>}
-        {active === 1 && <p className="footage-attribution">Demo excerpt: <a href="https://mango.blender.org/" target="_blank" rel="noreferrer">Tears of Steel</a> · © Blender Foundation / Ian Hubert · <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noreferrer">CC BY 3.0</a> · Log-look treatment added for this preview.</p>}
+        {item.name !== 'SOUND' && <div className="craft-scrubber"><span>{item.a}</span><input type="range" min="0" max="100" value={Math.round(progress * 100)} aria-label={item.instruction} onChange={event => { const next = Number(event.target.value) / 100; if (item.name === 'COLOR') colorStartRef.current = scrollOffset - next * 480; setProgress(next); }} /><span>{item.b}</span></div>}
+        {item.name === 'COLOR' && <p className="footage-attribution">Demo excerpt: <a href="https://mango.blender.org/" target="_blank" rel="noreferrer">Tears of Steel</a> · © Blender Foundation / Ian Hubert · <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noreferrer">CC BY 3.0</a> · Log-look treatment added for this preview.</p>}
         {videoError && <p className="media-error" role="status">{videoError}</p>}
         <div className="craft-description"><div><span className="craft-instruction">{item.instruction} ↗</span><h3>{item.heading}</h3></div><p>{item.detail}</p></div>
         {audioError && <p role="status" className="media-error">{audioError}</p>}

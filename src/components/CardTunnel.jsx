@@ -228,7 +228,7 @@ export default function CardTunnel({ cards, cameraZ, maxZ, onCardClick, paused =
         })}
       </div>
       </div>
-      <div className="tunnel-heading" style={{ opacity: clamp(1 - cameraZ / 1400, 0, 1) }}><span>POST PRODUCTION / CAIRO × LOS ANGELES</span><h2>Beyond<em>the frame.</em></h2></div>
+      <div className="tunnel-heading" style={{ opacity: clamp(1 - cameraZ / 1400, 0, 1) }}><span>POST PRODUCTION / CAIRO / WORLDWIDE</span><h2>Beyond<em>the frame.</em></h2></div>
       <div className="tunnel-reticle" aria-hidden="true" style={{ opacity: cameraZ < 600 ? 1 : 0 }}><span>SCROLL TO TRAVEL</span><span>CLICK A FRAME TO ENTER</span></div>
     </div>
     <div ref={hitLayerRef} className="card-hit-layer" aria-label="Project frames" style={{ visibility: interactive ? 'visible' : 'hidden' }} inert={!interactive ? '' : undefined}>
