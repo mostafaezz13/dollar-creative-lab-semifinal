@@ -1,0 +1,50 @@
+# Dollar Creative Lab — React portfolio
+
+A React 18 and Vite 6 application for a post-production studio, with GSAP reveals and browser-composited project transitions.
+
+## Run locally
+
+Use Node.js 24 and npm 11 (the versions validated for this project).
+
+```sh
+npm ci
+npm run dev
+```
+
+Vite uses port 3000. Keep the terminal open while developing.
+
+```sh
+npm run build
+npm run preview
+```
+
+The production output is `dist/`. On Vercel or Netlify, select Vite, use `npm run build`, and set the output directory to `dist`. No backend or environment variables are required for the current demo.
+
+## Project structure
+
+- `src/`: React components, hooks, animations, styling and project data.
+- `public/`: bundled demo videos and preview frames.
+- `fonts/`: the existing studio font assets.
+- `scripts/export-preview.py`: optional standalone HTML export for review; it is not the application source. Run it after building with `python scripts/export-preview.py output.html`.
+
+`index.html` is Vite's normal React entry document; `src/main.jsx` mounts the application. Downloaded standalone previews are not needed to run or deploy this project.
+
+## Current behavior
+
+- Pointer-controlled 3D project tunnel with clickable frames and full-screen film transitions.
+- Editing, Color, Finishing and Sound studies.
+- Scroll-controlled simulated log-look to graded video treatment.
+- Animated showreel, contact and studio-name sections.
+- Keyboard navigation, dialog focus handling and reduced-motion support.
+
+The project manager stores edits in the current browser's `localStorage`. Those edits do not update this repository, other browsers, or a deployed site's project data. Persistent shared management would require a backend or CMS.
+
+## Content and media
+
+Default projects, credits, addresses, social destinations and shared demo films are presentation content. Replace and verify them before a public client launch. The existing font and original video assets are retained from the source repository; their publication rights should be confirmed by the owner.
+
+The added color-study excerpt is from *Tears of Steel*, licensed CC BY 3.0. The source, attribution and changes are documented in [MEDIA-CREDITS.md](MEDIA-CREDITS.md) and displayed in the app. Its flat/log-like appearance is a demonstration filter, not original camera LOG. Its cropped video is 1920×720 without upscaling.
+
+## Validation
+
+`npm run build` is the production build check. Browser validation has exercised real project clicks and mobile taps, color progression, delivery formats, showreel wheel and touch scrolling, the studio-name transition, and responsive contact layout. No automated test runner is configured in `package.json`.
