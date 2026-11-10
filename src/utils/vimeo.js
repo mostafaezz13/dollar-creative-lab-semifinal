@@ -30,7 +30,7 @@ export function vimeoEmbedUrl(value, { muted = false, loop = false, controls = t
   const url = new URL(`https://player.vimeo.com/video/${video.id}`);
   if (video.hash) url.searchParams.set('h', video.hash);
   // Background playback is only requested for nearby cards. Main films start after their transition.
-  Object.entries({ autoplay: background ? 1 : 0, muted: muted ? 1 : 0, loop: loop ? 1 : 0, controls: controls ? 1 : 0, background: background ? 1 : 0, playsinline: 1, dnt: 1, title: 0, byline: 0, portrait: 0 }).forEach(([key,value]) => url.searchParams.set(key,String(value)));
+  Object.entries({ autoplay: background ? 1 : 0, autopause: background ? 0 : 1, muted: muted ? 1 : 0, loop: loop ? 1 : 0, controls: !background && controls ? 1 : 0, background: background ? 1 : 0, playsinline: 1, dnt: 1, title: 0, byline: 0, portrait: 0 }).forEach(([key,value]) => url.searchParams.set(key,String(value)));
   return url.href;
 }
 

@@ -4,7 +4,7 @@ export default function useDialog(ref, onClose) {
   useEffect(() => {
     const el = ref.current;
     const previous = document.activeElement;
-    const focusables = () => [...el.querySelectorAll('button, a[href], input, textarea, select, [tabindex="0"]')].filter(node => !node.disabled && node.getClientRects().length);
+    const focusables = () => [...el.querySelectorAll('button, a[href], input, textarea, select, summary, [tabindex="0"]')].filter(node => !node.disabled && node.getClientRects().length);
     (focusables()[0] || el).focus();
     const handleKey = event => {
       if (event.key === 'Escape') { event.stopPropagation(); onClose(); }

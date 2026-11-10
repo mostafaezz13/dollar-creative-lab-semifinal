@@ -30,3 +30,14 @@ test('background previews are muted and looping when requested', () => {
   for (const key of ['background','muted','loop','autoplay']) assert.equal(url.searchParams.get(key),'1');
   assert.equal(url.searchParams.get('controls'),'0');
 });
+test('custom project controls disable Vimeo UI without muting the film', () => {
+  const url = new URL(vimeoEmbedUrl('https://vimeo.com/123456789',{controls:false}));
+  assert.equal(url.searchParams.get('controls'),'0');
+  assert.equal(url.searchParams.get('muted'),'0');
+  assert.equal(url.searchParams.get('autopause'),'1');
+});
+test('background mode always disables native controls and permits parallel previews', () => {
+  const url = new URL(vimeoEmbedUrl('https://vimeo.com/123456789',{background:true}));
+  assert.equal(url.searchParams.get('controls'),'0');
+  assert.equal(url.searchParams.get('autopause'),'0');
+});
