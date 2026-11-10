@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useRef } from 'react';
 import useReveal from '../hooks/useReveal.js';
+import SplitText from './SplitText.jsx';
 
 export default function WorkSection({ projects, onProjectClick, onBack, onNext, onRowHover, scrollOffset = 0 }) {
   const [activeCategory, setActiveCategory] = useState('ALL');
@@ -41,7 +42,7 @@ export default function WorkSection({ projects, onProjectClick, onBack, onNext, 
     });
   }, [projects, activeCategory, activeYear]);
 
-  useReveal(sectionRef, '.archive-row', filteredProjects);
+  const inView = useReveal(sectionRef, '.archive-row', filteredProjects);
 
   return (
     <section
@@ -60,7 +61,7 @@ export default function WorkSection({ projects, onProjectClick, onBack, onNext, 
             <span className="bracket bracket-right">]</span>
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <div className="archive-topbar-title">PROJECT ARCHIVE</div>
+            <div className="archive-topbar-title"><SplitText type="chars" inView={inView}>PROJECT ARCHIVE</SplitText></div>
           </div>
         </div>
 
@@ -151,7 +152,6 @@ export default function WorkSection({ projects, onProjectClick, onBack, onNext, 
             id="archiveToContactBtn"
             className="cult-next-btn group"
             type="button"
-            style={{ color: '#000', borderColor: 'rgba(0,0,0,0.25)' }}
             onClick={onNext}
           >
             <span>GET IN TOUCH</span> →

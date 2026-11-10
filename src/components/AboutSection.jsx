@@ -107,7 +107,7 @@ export default function AboutSection({ onNext, scrollOffset = 0 }) {
                   style={{
                     color: isLit ? '#ffffff' : 'rgba(255, 255, 255, 0.25)',
                     opacity: wordOpacity,
-                    transform: isLit ? 'translateY(0) scale(1)' : 'translateY(3px) scale(0.97)',
+                    transform: isLit ? 'translateY(0) scale(1)' : 'translateY(16px) rotateX(-12deg) scale(0.97)',
                     textShadow: isLit ? '0 0 18px rgba(255,255,255,0.3)' : 'none',
                     transition: 'color 0.45s ease, opacity 0.45s ease, transform 0.45s ease, text-shadow 0.45s ease',
                     display: 'inline-block'

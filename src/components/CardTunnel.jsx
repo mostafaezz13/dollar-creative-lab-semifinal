@@ -17,6 +17,42 @@ export default function CardTunnel({ cards, cameraZ, maxZ, onCardClick, paused =
   const reducedMotion = useReducedMotion();
   const rigRef = useRef(null);
   const viewportRef = useRef(null);
+  const hitLayerRef = useRef(null);
+  const visualsRef = useRef([]);
+  const hitsRef = useRef([]);
+  const interactive = !paused && cameraZ < maxZ;
+
+  useEffect(() => {
+    if (!interactive) return;
+    let frame;
+    const update = () => {
+      // Read the four projected corners, then update flat hit targets in one write batch.
+      // This avoids browser hit-testing differences for negative-Z elements.
+      const geometry = visualsRef.current.map(element => {
+        if (!element || element.style.visibility === 'hidden') return null;
+        const points = [...element.querySelectorAll('.card-projection-corner')].map(corner => corner.getBoundingClientRect());
+        if (points.length !== 4) return null;
+        const left = Math.min(...points.map(p => p.x));
+        const top = Math.min(...points.map(p => p.y));
+        const right = Math.max(...points.map(p => p.x));
+        const bottom = Math.max(...points.map(p => p.y));
+        const width = right-left, height = bottom-top;
+        if (width < 10 || height < 10 || right < 0 || bottom < 0 || left > innerWidth || top > innerHeight) return null;
+        return { left, top, width, height, polygon: points.map(p => `${(p.x-left)/width*100}% ${(p.y-top)/height*100}%`).join(',') };
+      });
+      geometry.forEach((box, i) => {
+        const button = hitsRef.current[i];
+        if (!button) return;
+        button.style.visibility = box ? 'visible' : 'hidden';
+        button.tabIndex = box ? 0 : -1;
+        if (!box) return;
+        Object.assign(button.style, { left: `${box.left}px`, top: `${box.top}px`, width: `${box.width}px`, height: `${box.height}px`, clipPath: `polygon(${box.polygon})` });
+      });
+      frame = requestAnimationFrame(update);
+    };
+    update();
+    return () => cancelAnimationFrame(frame);
+  }, [interactive, cards]);
   const motionRef = useRef({ x: 0, y: 0, targetX: 0, targetY: 0 });
   useEffect(() => {
     const rig = rigRef.current;
@@ -64,12 +100,12 @@ export default function CardTunnel({ cards, cameraZ, maxZ, onCardClick, paused =
   // Scene is clamped to maxZ; per-card optics use the raw cameraZ (matches legacy).
   const clampedCameraZ = Math.min(cameraZ, maxZ);
 
-  const focusRange = 400;
   const convergeStart = -2000;
   const convergeEnd = 0;
   const exitStart = 650;
 
   return (
+    <>
     <div id="viewport" ref={viewportRef} aria-hidden={cameraZ > maxZ} style={{ pointerEvents: 'none' }}>
       <div className="tunnel-atmosphere" aria-hidden="true" />
       <div className="tunnel-hud" aria-hidden="true" style={{ opacity: cameraZ < maxZ - 900 ? 1 : 0 }}>
@@ -143,17 +179,6 @@ export default function CardTunnel({ cards, cameraZ, maxZ, onCardClick, paused =
             holdScale = Math.max((targetSize / perspMag) * exitShrink, 0.02);
           }
 
-          // Brightness & distance — mirrors legacy's three-branch formula
-          let brightness;
-          if (effectiveZ > -focusRange) {
-            brightness = 1;
-          } else if (effectiveZ < -3000) {
-            brightness = clamp(0.60 + 0.25 * (effectiveZ + 9000) / 6000, 0.60, 0.85);
-          } else {
-            const t = (effectiveZ + 3000) / (3000 - focusRange);
-            brightness = clamp(0.70 + 0.30 * t * t, 0.70, 1);
-          }
-
           const opacity = clamp(1 - ep, 0, 1);
           const isVisible = ep < 1;
           const isFocused = effectiveZ > 300 && ep < 0.4;
@@ -168,22 +193,20 @@ export default function CardTunnel({ cards, cameraZ, maxZ, onCardClick, paused =
           return (
             <div
               key={card.idx}
-              className={`pcard cinematic-card card-tone-${i % 4}${isFocused ? ' in-focus' : ''}`}
-              role="button"
-              tabIndex={isVisible && effectiveZ > -4500 && cameraZ < maxZ && !paused ? 0 : -1}
-              aria-label={`Play ${card.sub} — ${card.title}`}
-              onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onCardClick(card, event.currentTarget); } }}
-              onClick={event => onCardClick(card, event.currentTarget)}
+              className={`pcard cinematic-card${isFocused ? ' in-focus' : ''}`}
+              ref={element => visualsRef.current[i] = element}
+              aria-hidden="true"
               style={{
-                pointerEvents: isVisible && cameraZ < maxZ && !paused ? 'auto' : 'none',
+                pointerEvents: 'none',
                 width: `${cardW}px`,
                 height: `${cardH}px`,
                 transform: transformStyle,
                 opacity,
-                filter: `brightness(${brightness})`,
+
                 visibility: isVisible ? 'visible' : 'hidden'
               }}
             >
+              {['tl','tr','br','bl'].map(corner => <i key={corner} className={`card-projection-corner corner-${corner}`} aria-hidden="true" />)}
               <video
                 muted
                 loop
@@ -208,5 +231,20 @@ export default function CardTunnel({ cards, cameraZ, maxZ, onCardClick, paused =
       <div className="tunnel-heading" style={{ opacity: clamp(1 - cameraZ / 1400, 0, 1) }}><span>POST PRODUCTION / CAIRO × LOS ANGELES</span><h2>Beyond<em>the frame.</em></h2></div>
       <div className="tunnel-reticle" aria-hidden="true" style={{ opacity: cameraZ < 600 ? 1 : 0 }}><span>SCROLL TO TRAVEL</span><span>CLICK A FRAME TO ENTER</span></div>
     </div>
+    <div ref={hitLayerRef} className="card-hit-layer" aria-label="Project frames" style={{ visibility: interactive ? 'visible' : 'hidden' }} inert={!interactive ? '' : undefined}>
+      {cards.map((card,i) => <button
+        key={card.idx} ref={button => hitsRef.current[i] = button}
+        className="card-hit-target" data-card-index={i}
+        aria-label={`Play ${card.sub} — ${card.title}`}
+        disabled={!interactive} tabIndex={-1}
+        style={{ zIndex: Math.round(10000 + card.z), visibility: 'hidden' }}
+        onClick={() => onCardClick(card, visualsRef.current[i])}
+        onPointerEnter={() => visualsRef.current[i]?.classList.add('is-hovered')}
+        onPointerLeave={() => visualsRef.current[i]?.classList.remove('is-hovered')}
+        onFocus={() => visualsRef.current[i]?.classList.add('is-hovered')}
+        onBlur={() => visualsRef.current[i]?.classList.remove('is-hovered')}
+      />)}
+    </div>
+    </>
   );
 }

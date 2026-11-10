@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import Header from './components/Header.jsx';
 import CardTunnel from './components/CardTunnel.jsx';
 import EndingScreen from './components/EndingScreen.jsx';
@@ -9,6 +9,7 @@ import ContactSection from './components/ContactSection.jsx';
 import VideoModal from './components/VideoModal.jsx';
 import AdminModal from './components/AdminModal.jsx';
 import useReducedMotion from './hooks/useReducedMotion.js';
+import { createEndingGate, advanceEndingGate } from './utils/endingGate.js';
 import { DEFAULT_PROJECTS, INITIAL_CARDS } from './data/projects.js';
 
 export default function App() {
@@ -34,6 +35,8 @@ export default function App() {
   const closeProject = useCallback(() => setActiveModalProject(null), []);
   const maxZ = Math.max(...INITIAL_CARDS.map(card => -card.z)) * (isMobile ? 1.4 : 1) + 1500;
   const brandStart = maxZ - 200;
+  const endingGateRef = useRef(createEndingGate());
+  const gestureRef = useRef({ wheel: 0, lastWheel: -Infinity, touch: 0, key: 0 });
 
   const [cameraZ, setCameraZ] = useState(0);
   const targetZRef = useRef(0);
@@ -116,15 +119,6 @@ export default function App() {
 
       setCameraZ(cameraZRef.current);
 
-      // Seamless theme toggle: Work starts dark on arrival (black),
-      // and smoothly transitions to light (white) as soon as the section reaches halfway into view.
-      if (workRef.current) {
-        const rect = workRef.current.getBoundingClientRect();
-        const vh = window.innerHeight || 900;
-        const isWhite = rect.top <= vh * 0.5 && rect.bottom >= vh * 0.5;
-        setTheme(isWhite ? 'light' : 'dark');
-      }
-
       rafRef.current = requestAnimationFrame(loop);
     };
 
@@ -133,6 +127,18 @@ export default function App() {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   }, [isMobile, reducedMotion]);
+
+  useLayoutEffect(() => {
+    const section = workRef.current;
+    if (!section) return;
+    const rect = section.getBoundingClientRect();
+    const clamp = value => Math.max(0, Math.min(1, value));
+    const entering = clamp((viewportH * .95 - rect.top) / (viewportH * .8));
+    const leaving = clamp((rect.bottom - viewportH * .05) / (viewportH * .8));
+    const light = Math.min(entering, leaving);
+    section.style.setProperty('--archive-light', String(light));
+    setTheme(light > .5 ? 'light' : 'dark');
+  }, [cameraZ, viewportH, totalMaxZ]);
 
   // Keep document.body in sync with the light theme (legacy toggles body.theme-light)
   useEffect(() => {
@@ -152,19 +158,25 @@ export default function App() {
     return () => window.removeEventListener('mousemove', onMove);
   }, []);
 
-  // Wheel and Touch Event Handlers (mirror legacy's scroll speed model)
+  // One arrival gesture stops on the ending; only a fresh gesture continues.
   useEffect(() => {
+    const moveScroll = (delta, gesture) => {
+      targetZRef.current = advanceEndingGate(endingGateRef.current, {
+        current: cameraZRef.current, target: targetZRef.current, delta, gesture, now: performance.now(),
+        start: brandStart, hold: maxZ - 100, contentStart: maxZ + window.innerHeight, total: totalMaxZ
+      });
+    };
     const handleWheel = (e) => {
       if (activeModalProject || adminOpen || menuOpen) return;
       if (e.ctrlKey || e.target.closest('input, textarea, select')) return;
       e.preventDefault();
       const delta = (e.deltaY || e.deltaX) * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? window.innerHeight : 1);
-      if (delta > 0 && cameraZRef.current >= brandStart && cameraZRef.current < maxZ + window.innerHeight) {
-        targetZRef.current = maxZ + window.innerHeight + 40;
-        return;
-      }
+      const input = gestureRef.current;
+      const now = performance.now();
+      if (now - input.lastWheel > 240) input.wheel += 1;
+      input.lastWheel = now;
       const mult = isMobile ? 1.6 : (cameraZRef.current > maxZ ? 1.15 : 1.5);
-      targetZRef.current = Math.max(0, Math.min(totalMaxZ, targetZRef.current + delta * mult));
+      moveScroll(delta * mult, `wheel-${input.wheel}`);
     };
 
     let touchLastY = 0;
@@ -177,6 +189,7 @@ export default function App() {
       if (e.touches.length !== 1 || e.target.closest('input, textarea, select, .color-wipe')) { touchActive = false; return; }
       const video = e.target.closest('video');
       if (video && e.touches[0].clientY > video.getBoundingClientRect().bottom - 48) { touchActive = false; return; }
+      gestureRef.current.touch += 1;
       touchLastY = e.touches[0].clientY;
       touchVelocity = 0;
       touchLastTime = Date.now();
@@ -195,13 +208,9 @@ export default function App() {
         const instantV = (dy / dt) * 1000;
         touchVelocity = touchVelocity * 0.3 + instantV * 0.7;
       }
-      if (dy > 0 && cameraZRef.current >= brandStart && cameraZRef.current < maxZ + window.innerHeight) {
-        targetZRef.current = maxZ + window.innerHeight + 40;
-        touchVelocity = 0;
-        return;
-      }
       const touchMult = cameraZRef.current > maxZ ? 1.5 : 2.2;
-      targetZRef.current = Math.max(0, Math.min(totalMaxZ, targetZRef.current + dy * touchMult));
+      moveScroll(dy * touchMult, `touch-${gestureRef.current.touch}`);
+      if (endingGateRef.current.holding) touchVelocity = 0;
       touchLastY = y;
       touchLastTime = now;
     };
@@ -210,7 +219,7 @@ export default function App() {
       if (!touchActive) return;
       touchActive = false;
       const momentum = reducedMotion ? 0 : touchVelocity * 0.35;
-      targetZRef.current = Math.max(0, Math.min(totalMaxZ, targetZRef.current + momentum));
+      moveScroll(momentum, `touch-${gestureRef.current.touch}`);
     };
 
     window.addEventListener('wheel', handleWheel, { passive: false });
@@ -242,25 +251,34 @@ export default function App() {
         return;
       }
       if (activeModalProject) return;
+      if (!e.repeat) gestureRef.current.key += 1;
       if (e.key === 'Home' || e.key === 'End') {
+        Object.assign(endingGateRef.current, createEndingGate(), { released: e.key === 'End' });
         e.preventDefault(); targetZRef.current = e.key === 'Home' ? 0 : totalMaxZ;
       }
       if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'PageDown') {
         e.preventDefault();
-        targetZRef.current = Math.max(0, Math.min(totalMaxZ, targetZRef.current + 380));
+        targetZRef.current = advanceEndingGate(endingGateRef.current, {
+          current: cameraZRef.current, target: targetZRef.current, delta: 380, gesture: `key-${gestureRef.current.key}`,
+          now: performance.now(), start: brandStart, hold: maxZ - 100, contentStart: maxZ + window.innerHeight, total: totalMaxZ
+        });
       }
       if (e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'PageUp') {
         e.preventDefault();
-        targetZRef.current = Math.max(0, Math.min(totalMaxZ, targetZRef.current - 380));
+        targetZRef.current = advanceEndingGate(endingGateRef.current, {
+          current: cameraZRef.current, target: targetZRef.current, delta: -380, gesture: `key-${gestureRef.current.key}`,
+          now: performance.now(), start: brandStart, hold: maxZ - 100, contentStart: maxZ + window.innerHeight, total: totalMaxZ
+        });
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [totalMaxZ, activeModalProject, adminOpen, menuOpen]);
+  }, [totalMaxZ, activeModalProject, adminOpen, menuOpen, brandStart, maxZ]);
 
   // Navigation jumping to exact section offsets
   const handleNavigate = (target) => {
     setMenuOpen(false);
+    Object.assign(endingGateRef.current, createEndingGate(), { released: typeof target !== 'number' || target > maxZ });
     if (typeof target === 'number') {
       targetZRef.current = target;
       return;

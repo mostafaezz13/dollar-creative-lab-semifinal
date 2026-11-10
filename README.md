@@ -31,10 +31,10 @@ The production output is `dist/`. On Vercel or Netlify, select Vite, use `npm ru
 
 ## Current behavior
 
-- Pointer-controlled 3D project tunnel with clickable frames and full-screen film transitions.
+- Pointer-controlled 3D project tunnel with projected click targets for all 15 frames and full-screen film transitions. Card media retain their original colors.
 - Editing, Color, Finishing and Sound studies.
 - Scroll-controlled simulated log-look to graded video treatment.
-- Animated showreel, contact and studio-name sections.
+- Animated showreel, contact and studio-name sections. Arriving at the studio ending consumes the current wheel/touch gesture; a fresh gesture continues to the next chapter.
 - Keyboard navigation, dialog focus handling and reduced-motion support.
 
 The project manager stores edits in the current browser's `localStorage`. Those edits do not update this repository, other browsers, or a deployed site's project data. Persistent shared management would require a backend or CMS.
@@ -47,4 +47,4 @@ The added color-study excerpt is from *Tears of Steel*, licensed CC BY 3.0. The 
 
 ## Validation
 
-`npm run build` is the production build check. Browser validation has exercised real project clicks and mobile taps, color progression, delivery formats, showreel wheel and touch scrolling, the studio-name transition, and responsive contact layout. No automated test runner is configured in `package.json`.
+`npm run build` is the production build check. Browser validation has exercised real project clicks and mobile taps, color progression, delivery formats, showreel wheel and touch scrolling, the studio-name transition, and responsive contact layout. `npm test` runs five Node tests for the ending gesture gate, including inertia, a second gesture, reverse navigation, and touch momentum.

@@ -19,10 +19,7 @@
 .cinematic-card .pcard-tag { opacity: 1; color: white; border-color: #ffffff50; background: #0004; }
 .cinematic-card .pcard-index { color: #fff; }
 .card-play-label { position: absolute; bottom: 18px; right: 18px; color: var(--signal); font-size: 8px; letter-spacing: .12em; opacity: 0; transform: translateY(8px); transition: opacity .4s,transform .5s; }
-.cinematic-card:hover .card-play-label, .cinematic-card:focus-visible .card-play-label { opacity: 1; transform: translateY(0); }
-.card-tone-1 video { filter: saturate(.55) contrast(1.15); }
-.card-tone-2 video { filter: sepia(.4) saturate(.7); }
-.card-tone-3 video { filter: saturate(.2) contrast(1.2); }
+.cinematic-card:hover .card-play-label, .cinematic-card.is-hovered .card-play-label, .cinematic-card:focus-visible .card-play-label { opacity: 1; transform: translateY(0); }
 .tunnel-heading { position: absolute; bottom: 95px; left: 36px; z-index: 2; pointer-events: none; transition: opacity .3s; }
 .tunnel-heading span { display: block; color: #b5bfaf; font: 9px/1.5 ltsuperiormono_medium,monospace; letter-spacing: .22em; margin-bottom: 18px; }
 .tunnel-heading h2 { font: 400 clamp(44px,6.4vw,104px)/.95 newyork,serif; letter-spacing: -.03em; color: #e6e8df; }
@@ -128,7 +125,7 @@
 
 /* Transparent 3D container planes must not intercept the frames behind them. */
 #scene, .camera-rig { pointer-events: none; }
-.pcard { pointer-events: auto; }
+.pcard { pointer-events: none; }
 .pcard:focus-visible { outline: 2px solid var(--signal); outline-offset: 5px; }
 
 .craft-tabs { grid-template-columns: repeat(4,minmax(0,1fr)); }
@@ -238,4 +235,48 @@
 @media (prefers-reduced-motion:reduce) {
  .brand-motion *, .ending-wordmark > span, .contact-marquee > div { animation: none !important; }
  .kinetic-reel .cult-showreel-player-box, .contact-details { transform:none; }
+}
+
+.card-projection-corner { position:absolute; width:0; height:0; pointer-events:none; }
+.corner-tl { left:0; top:0; }.corner-tr { right:0; top:0; }.corner-br { right:0; bottom:0; }.corner-bl { left:0; bottom:0; }
+.card-hit-layer { position:fixed; inset:0; z-index:5; pointer-events:none; }
+.card-hit-target { position:absolute; pointer-events:auto; padding:0; margin:0; border:0; background:transparent; cursor:pointer; }
+.card-hit-target:focus-visible { outline:0; background:#d9ff7a12; box-shadow:inset 0 0 0 2px var(--signal); }
+.cinematic-card.is-hovered::after { border-color:#d9ff7a99; box-shadow:inset 0 0 40px #d9ff7a10; }
+.cinematic-card.is-hovered video { transform:scale(1.04); }
+
+/* Whole-word masks retain descenders while each line lifts into place. */
+.split-word { display:inline-block; white-space:nowrap; }
+.split-mask { display:inline-block; overflow:hidden; vertical-align:baseline; padding-bottom:.16em; margin-bottom:-.16em; perspective:700px; }
+.split-unit-inner { display:inline-block; transform-origin:50% 100%; will-change:transform,opacity; }
+.kinetic-contact .cult-contact-main-heading .split-text { display:block; }
+.kinetic-contact .cult-contact-main-heading .split-text span { display:inline-block; color:inherit; font-style:inherit; }
+.kinetic-contact .cult-contact-main-heading > .contact-main-line { color:#fff; font-style:normal; }
+.kinetic-contact .cult-contact-main-heading > .contact-secondary { color:var(--signal); font-style:italic; }
+.black-ending-screen.visible .brand-kicker { animation:content-rise .85s .1s var(--motion-ease) both; }
+.black-ending-screen.visible .ending-sub { animation:content-rise .9s .35s var(--motion-ease) both; }
+.black-ending-screen.visible .ending-buttons { animation:content-rise .9s .5s var(--motion-ease) both; }
+
+/* A white surface sweeps through the archive; difference blending keeps text
+   readable on both sides of the same moving edge, without a gray-on-gray fade. */
+body, body.theme-light, .page-content-track, .page-content-track.theme-light { background-color:#000; transition:none; }
+#archiveSection { isolation:isolate; background:#000; color:#fff; transition:none; }
+#archiveSection::before { content:''; position:absolute; inset:0; z-index:0; background:#fff; transform:scaleY(var(--archive-light,0)); transform-origin:50% 0; pointer-events:none; will-change:transform; }
+#archiveSection .archive-inner { position:relative; z-index:1; color:#fff; mix-blend-mode:difference; transition:none; }
+#archiveSection .archive-back-btn, #archiveSection .filter-btn, #archiveSection .archive-row, #archiveSection .cult-next-btn { color:inherit; transition:opacity .25s,background .25s, padding-left .25s,transform .35s; }
+#archiveSection .archive-topbar-title, #archiveSection .filter-heading, #archiveSection .archive-footer-copy { color:#ffffff99; transition:none; }
+#archiveSection .archive-row, #archiveSection .archive-topbar, #archiveSection .archive-filter-grid, #archiveSection .archive-list-wrap, #archiveSection .archive-footer { border-color:#ffffff26; transition:border-color .25s; }
+#archiveSection .archive-row { transition:background-color .25s,padding-left .25s; }
+#archiveSection .archive-row:hover, #archiveSection .archive-row:focus-visible { background:#fff; color:#000; }
+#archiveSection .archive-row:hover > div { color:inherit; }
+#archiveSection .filter-btn.active::after { background:currentColor; transition:none; }
+#archiveSection .filter-btn { opacity:.6; }
+#archiveSection .filter-btn.active, #archiveSection .filter-btn:hover { opacity:1; }
+#archiveSection .archive-empty-state { color:#ffffff99; }
+#archiveSection .cult-next-btn { border-color:#ffffff66; }
+#archiveSection .cult-next-btn:hover { background:#ffffff18; }
+.site-header .site-logo, .site-header nav a, .site-header .nav-admin-link { transition:color .45s ease,opacity .25s ease; }
+@media(prefers-reduced-motion:reduce) {
+ .split-unit-inner { will-change:auto; }
+ .black-ending-screen.visible .brand-kicker, .black-ending-screen.visible .ending-sub, .black-ending-screen.visible .ending-buttons { animation:none; }
 }

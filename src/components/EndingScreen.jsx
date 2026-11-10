@@ -9,7 +9,7 @@ export default function EndingScreen({ onEnterWork, onContinue, visible = true }
         <h2 className="ending-wordmark">{['DOLLAR','CREATIVE','LAB'].map((word,i)=><span key={word} style={{'--word-index':i}}>{word}</span>)}</h2>
         <div className="ending-sub">POST PRODUCTION HOUSE</div>
         <div className="ending-buttons"><button id="viewWorkBtn" className="view-work-btn" onClick={onEnterWork}>VIEW WORK ↗</button><button className="ending-roster-link" onClick={onContinue}>MEET THE STUDIO ↓</button></div>
-        <button type="button" className="ending-scroll-indicator" id="endingScrollIndicator" onClick={onContinue}><span className="scroll-indicator-text">ONE SCROLL. NEXT CHAPTER.</span><span className="ending-scroll-arrow">↓</span></button>
+        <button type="button" className="ending-scroll-indicator" id="endingScrollIndicator" onClick={onContinue}><span className="scroll-indicator-text">SCROLL AGAIN TO CONTINUE</span><span className="ending-scroll-arrow">↓</span></button>
       </div>
     </section>
   );

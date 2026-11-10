@@ -1,12 +1,13 @@
 import React, { useRef } from 'react';
 import useReveal from '../hooks/useReveal.js';
+import SplitText from './SplitText.jsx';
 import useScrollScene from '../hooks/useScrollScene.js';
 import useReducedMotion from '../hooks/useReducedMotion.js';
 
 export default function ContactSection({ onBack, onScrollTop, scrollOffset = 0 }) {
   const containerRef = useRef(null);
   const reduced = useReducedMotion();
-  useReveal(containerRef, '.cult-eyebrow, .cult-contact-main-heading, .cult-contact-card');
+  const inView = useReveal(containerRef, '.cult-eyebrow, .cult-contact-main-heading, .cult-contact-card');
   useScrollScene(containerRef, scrollOffset);
   const tilt = event => {
     if (reduced || event.pointerType === 'touch') return;
@@ -25,7 +26,7 @@ export default function ContactSection({ onBack, onScrollTop, scrollOffset = 0 }
       <div id="contactInner" className="cult-section-inner">
         <div className="cult-eyebrow"><i className="availability-dot"/> OPEN FOR THE NEXT GREAT STORY</div>
         <div className="cult-contact-wrap">
-          <div><span className="contact-chapter">CAIRO × LOS ANGELES / WORLDWIDE</span><h2 className="cult-contact-main-heading">Let’s make<span>the next cut.</span></h2><p className="contact-intro">For directors, creators and brands with a story worth telling. Bring the idea. We’ll shape what comes next.</p><a className="contact-project-link" href="mailto:contact@dollarcreativelab.com">START A PROJECT <span aria-hidden="true">↗</span></a></div>
+          <div><span className="contact-chapter">CAIRO × LOS ANGELES / WORLDWIDE</span><h2 className="cult-contact-main-heading"><SplitText tag="span" className="contact-main-line" inView={inView} stagger={.08}>Let’s make</SplitText><SplitText tag="span" className="contact-secondary" inView={inView} delay={.15} stagger={.08}>the next cut.</SplitText></h2><p className="contact-intro">For directors, creators and brands with a story worth telling. Bring the idea. We’ll shape what comes next.</p><a className="contact-project-link" href="mailto:contact@dollarcreativelab.com">START A PROJECT <span aria-hidden="true">↗</span></a></div>
           <div className="cult-contact-card"><div className="contact-details" onPointerMove={tilt} onPointerLeave={reset}>
             <span className="contact-card-index">LET’S TALK / 01</span>
             <div className="cult-contact-meta-group"><div className="cult-contact-meta-label">DIRECT INQUIRIES &amp; BOOKINGS</div><a href="mailto:contact@dollarcreativelab.com" className="cult-contact-big-email">contact@dollarcreativelab.com</a></div>
