@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import useReducedMotion from '../hooks/useReducedMotion.js';
 import FilmPlayer from './FilmPlayer.jsx';
+import { nearestTunnelPreview } from '../utils/mobilePerformance.js';
 import { PLACEHOLDER_VIDEO } from '../data/projects.js';
 
 const EXIT_DIRS = [
@@ -14,13 +15,30 @@ const EXIT_ORDER = [1, 0, 4, 1, 3, 0, 2, 1, 0, 3, 1, 4, 0];
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
-export default function CardTunnel({ cards, cameraZ, maxZ, onCardClick, paused = false }) {
+export default function CardTunnel({ cards, cameraZ, maxZ, onCardClick, paused = false, ready = true, mobileMode = false }) {
   const reducedMotion = useReducedMotion();
   const rigRef = useRef(null);
   const viewportRef = useRef(null);
   const hitLayerRef = useRef(null);
   const visualsRef = useRef([]);
   const hitsRef = useRef([]);
+  const [windowSize, setWindowSize] = useState({
+    vw: typeof window !== 'undefined' ? window.innerWidth : 1440,
+    vh: typeof window !== 'undefined' ? window.innerHeight : 900
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({ vw: window.innerWidth, vh: window.innerHeight });
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const { vw, vh } = windowSize;
+  const isMobile = vw < 768;
+
+  const projectionScroll = mobileMode ? cameraZ : 0;
   const interactive = !paused && cameraZ < maxZ;
 
   useEffect(() => {
@@ -49,15 +67,15 @@ export default function CardTunnel({ cards, cameraZ, maxZ, onCardClick, paused =
         if (!box) return;
         Object.assign(button.style, { left: `${box.left}px`, top: `${box.top}px`, width: `${box.width}px`, height: `${box.height}px`, clipPath: `polygon(${box.polygon})` });
       });
-      frame = requestAnimationFrame(update);
+      if (!mobileMode) frame = requestAnimationFrame(update);
     };
     update();
     return () => cancelAnimationFrame(frame);
-  }, [interactive, cards]);
+  }, [interactive, cards, mobileMode, projectionScroll, vw, vh]);
   const motionRef = useRef({ x: 0, y: 0, targetX: 0, targetY: 0 });
   useEffect(() => {
     const rig = rigRef.current;
-    if (reducedMotion) { rig.style.transform = 'none'; return; }
+    if (reducedMotion || mobileMode) { rig.style.transform = 'none'; return; }
     if (paused) return;
     let frame;
     const motion = motionRef.current;
@@ -77,22 +95,7 @@ export default function CardTunnel({ cards, cameraZ, maxZ, onCardClick, paused =
     document.addEventListener('pointerleave', reset);
     frame = requestAnimationFrame(loop);
     return () => { cancelAnimationFrame(frame); window.removeEventListener('pointermove', move); document.removeEventListener('pointerleave', reset); };
-  }, [reducedMotion, paused]);
-  const [windowSize, setWindowSize] = useState({
-    vw: typeof window !== 'undefined' ? window.innerWidth : 1440,
-    vh: typeof window !== 'undefined' ? window.innerHeight : 900
-  });
-
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowSize({ vw: window.innerWidth, vh: window.innerHeight });
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const { vw, vh } = windowSize;
-  const isMobile = vw < 768;
+  }, [reducedMotion, paused, mobileMode]);
 
   const spread = isMobile ? 1.2 : 1.6;
   const spreadY = isMobile ? 2.4 : spread;
@@ -104,6 +107,23 @@ export default function CardTunnel({ cards, cameraZ, maxZ, onCardClick, paused =
   const convergeStart = -2000;
   const convergeEnd = 0;
   const exitStart = 650;
+  const [pageVisible,setPageVisible] = useState(()=>!document.hidden);
+  const [mobilePreview,setMobilePreview] = useState(-1);
+  const candidate = nearestTunnelPreview(cards,cameraZ,maxZ,zStretch);
+  useEffect(()=>{
+    const update=()=>setPageVisible(!document.hidden);
+    document.addEventListener('visibilitychange',update);
+    return()=>document.removeEventListener('visibilitychange',update);
+  },[]);
+  useEffect(()=>{
+    setMobilePreview(-1);
+    if(!mobileMode || !ready || paused || !pageVisible || candidate<0)return;
+    // Let the loader's exit paint, and avoid initializing players while a swipe
+    // is rapidly moving through several candidate cards.
+    const timer=setTimeout(()=>setMobilePreview(candidate),240);
+    return()=>clearTimeout(timer);
+  },[mobileMode,ready,paused,pageVisible,candidate]);
+  const mobilePlaybackReady=ready&&!paused&&pageVisible;
 
   return (
     <>
@@ -120,10 +140,11 @@ export default function CardTunnel({ cards, cameraZ, maxZ, onCardClick, paused =
           transform: `translateZ(${clampedCameraZ}px)`
         }}
       >
-        <div className="depth-grid" aria-hidden="true" />
+        {!mobileMode && <div className="depth-grid" aria-hidden="true" />}
         {['EDITING', 'COLORING', 'SOUND', 'FINISHING'].map((word, index) => {
           const z = (-800 - index * 2200) * zStretch;
           const relative = z + cameraZ;
+          if(mobileMode && (relative < -1800 || relative > 1600)) return null;
           return <div key={word} className={`depth-type depth-type-${index}`} aria-hidden="true" style={{
             transform: `translate(-50%, -50%) translate3d(${index % 2 ? 180 : -180}px, ${index % 2 ? -250 : 260}px, ${z}px) rotateY(${index % 2 ? -12 : 12}deg)`,
             opacity: clamp((1600 - relative) / 1000, 0, 1), visibility: relative > 1600 ? 'hidden' : 'visible'
@@ -212,7 +233,9 @@ export default function CardTunnel({ cards, cameraZ, maxZ, onCardClick, paused =
                 source={card.project?.videoUrl || PLACEHOLDER_VIDEO}
                 title={`${card.sub} — ${card.title}`}
                 background muted loop controls={false}
-                autoplay active startFraction={0.5}
+                autoplay
+                active={!mobileMode || (mobilePlaybackReady && i===candidate && i===mobilePreview)}
+                startFraction={0.5}
                 poster={card.project?.poster || ''}
                 aspectRatio={card.project?.width && card.project?.height ? card.project.width / card.project.height : 16/9}
               />

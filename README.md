@@ -47,7 +47,7 @@ The added color-study excerpt is from *Tears of Steel*, licensed CC BY 3.0. The 
 
 ## Validation
 
-`npm run build` is the production build check. Browser validation has exercised real project clicks and mobile taps, color progression, delivery formats, showreel wheel and touch scrolling, the studio-name transition, and responsive contact layout. `npm test` runs five Node tests for the ending gesture gate, including inertia, a second gesture, reverse navigation, and touch momentum, plus six Vimeo URL-validation and privacy-hash tests.
+`npm run build` is the production build check. Browser validation has exercised real project clicks and mobile taps, color progression, delivery formats, showreel wheel and touch scrolling, the studio-name transition, and responsive contact layout. `npm test` covers the ending gesture gate, Vimeo URL/privacy settings, catalogue integrity, preview start offsets, mobile device detection and nearest-preview selection.
 
 ## Vimeo videos
 
@@ -60,7 +60,7 @@ poster: 'https://your-image-host.example/project-poster.jpg'
 
 Change the studio reel in `src/data/showreel.js`. The real account catalogue is in `src/data/vimeo-projects.json`; the owner-selected reel is **SELECTED BRAND WORK** (Vimeo ID `1237014270`). Setting a Vimeo URL in the local project manager changes only that browser; change the source data and push it for shared publication.
 
-All ten tunnel films load together, start halfway through their actual duration, and loop silently. Their players stay mounted and playing when cards move out of view or a project opens; scrolling and camera motion do not restart them. Vimeo autopause is disabled for background previews. Project films use the site's own play/pause, seek, mute, volume and fullscreen controls; Vimeo's native controls are disabled. The project title appears once below the film, with credits in a collapsed About panel. Closing a project and leaving the showreel pause playback. Vimeo-backed HTML exports require Internet access for the Vimeo player and video streams.
+On desktop, all ten tunnel films load together, start halfway through their actual duration, and loop silently. Their desktop players stay mounted and playing when cards move out of view or a project opens. On phones/tablets and narrow screens, no player loads during the opening sequence; only the nearest card loads after the loader exits and the selection settles for 240 ms. This player is released when the card changes, a menu/project opens, the ending arrives, or the tab is hidden. Vimeo autopause is disabled for background previews. Project films use the site's own play/pause, seek, mute, volume and fullscreen controls; Vimeo's native controls are disabled. The project title appears once below the film, with credits in a collapsed About panel. Closing a project and leaving the showreel pause playback. Vimeo-backed HTML exports require Internet access for the Vimeo player and video streams.
 
 Private/unlisted films not exposed on the public profile need their complete share URLs. No Vimeo access token belongs in this frontend.
 
@@ -86,6 +86,14 @@ The services are Editing, Color, Sound and Finishing, in that order. Visual pane
 
 ### Work previews and page motion
 
-Work hover previews prefer the project's actual film URL and play silently from its midpoint. Up to three preview players stay mounted; returning to a cached row resumes its player. Work prepares two likely previews as the archive approaches the viewport. Vimeo is briefly primed while muted to complete the initial seek, then inactive previews pause. Pointer previews stay inside the screen; touch devices open the project directly.
+Work hover previews prefer the project's actual film URL and play silently from its midpoint. Up to three preview players stay mounted; returning to a cached row resumes its player. Work prepares two likely previews as the archive approaches the viewport. Vimeo is briefly primed while muted to complete the initial seek, then inactive previews pause. Pointer previews stay inside the screen; touch devices open the project directly. Constrained devices never create the hover preview pool, including in landscape.
 
 `useReveal` animates elements into and out of the viewport repeatedly, including reverse scrolling and dynamically filtered rows. Independent translate/rotate/scale properties preserve the existing scene transforms. Filters and service tabs animate old content out before replacement; split text, header links, project details and the project manager have matching transitions. Reduced-motion mode keeps content visible and skips the decorative movement.
+
+### Mobile playback budget
+
+`useMobilePerformance` detects narrow screens, mobile user agents, coarse pointers and desktop-style iPadOS. The constrained policy survives rotation. Mobile Showreel players mount only while the section is visible, and unmount on departure; desktop retains its existing behavior.
+
+The large tunnel floor grid is omitted on mobile. Camera idle drift and pointer tilt are disabled, projected hit targets update only when geometry changes, distant background word layers are omitted, and entrance/exit motion uses opacity and translation without 3D tilt. The opening curtains remain, without the full-screen zoom or logo blur. Desktop visuals and simultaneous playback are preserved.
+
+Browser verification checks zero Vimeo iframes throughout the mobile preloader, a maximum of one through tunnel/project/Showreel navigation, no hidden Work pool, landscape behavior and the ten-player desktop path. These checks use a mobile viewport; confirmation of the reported WebKit process crash still requires testing the deployed fix on the affected iPhone.

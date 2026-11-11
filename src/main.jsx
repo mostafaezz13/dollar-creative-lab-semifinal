@@ -6,6 +6,7 @@ import './cinematic.css';
 import './studio-effects.css';
 import './brand.css';
 import './motion.css';
+import './mobile-performance.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

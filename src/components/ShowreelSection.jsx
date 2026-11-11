@@ -10,6 +10,7 @@ export default function ShowreelSection({
   onBack,
   onNext,
   scrollOffset = 0,
+  mobileMode = false,
 }) {
   const containerRef = useRef(null);
   const viewerRef = useRef(null);
@@ -42,8 +43,9 @@ export default function ShowreelSection({
   useEffect(() => {
     if (!isInView && !fullscreen) {
       videoRef.current?.pause();
+      if(mobileMode) update({ready:false,playing:false,currentTime:0,ended:false});
     }
-  }, [isInView, fullscreen]);
+  }, [isInView, fullscreen, mobileMode]);
 
   useEffect(() => {
     const syncFullscreen = () => {
@@ -161,7 +163,7 @@ export default function ShowreelSection({
         <div className="reel-perspective">
           <div className="showreel-custom-viewer" ref={viewerRef}>
             <div className="cult-showreel-player-box">
-              <FilmPlayer
+              {(!mobileMode || isInView || fullscreen) && <FilmPlayer
                 id="cultShowreelVideo"
                 ref={videoRef}
                 className="cult-showreel-video"
@@ -207,7 +209,7 @@ export default function ShowreelSection({
                   update({ ready: false, playing: false });
                   setError('The showreel could not load. Please refresh.');
                 }}
-              />
+              />}
 
               <button
                 id="showreelPlayBtn"

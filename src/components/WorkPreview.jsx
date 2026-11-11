@@ -11,7 +11,7 @@ const remember = (list, project) => list.some(item=>item.id===project.id)
   ? list.map(item=>item.id===project.id?project:item)
   : [...list.slice(-2),project];
 
-export default function WorkPreview({ project, projects }) {
+export default function WorkPreview({ project, projects, enabled = true }) {
   const host = useRef(null);
   const lastProject = useRef(null);
   const [pool,setPool] = useState([]);
@@ -21,7 +21,7 @@ export default function WorkPreview({ project, projects }) {
   const reduced = useReducedMotion();
   if(project)lastProject.current=project;
   const selected=project||lastProject.current;
-  const visible=Boolean(project&&desktop&&inView);
+  const visible=Boolean(enabled&&project&&desktop&&inView);
   const selectedStatus=status[selected?.id]||{};
   const isPlaying=Boolean(selectedStatus.ready&&selectedStatus.playing);
   const update=(id,patch)=>setStatus(previous=>({...previous,[id]:{...previous[id],...patch}}));
@@ -39,16 +39,16 @@ export default function WorkPreview({ project, projects }) {
   },[]);
   // Prepare two likely previews when Work arrives, with a strict three-player cap.
   useEffect(()=>{
-    if(!desktop||!inView)return;
+    if(!enabled||!desktop||!inView)return;
     setPool(previous=>{
       if(previous.length)return previous;
       return projects.filter(item=>isFilm(sourceFor(item))).slice(0,2);
     });
-  },[desktop,inView,projects]);
+  },[enabled,desktop,inView,projects]);
   useLayoutEffect(()=>{
-    if(!project||!desktop)return;
+    if(!enabled||!project||!desktop)return;
     setPool(previous=>remember(previous,project));
-  },[project,desktop]);
+  },[enabled,project,desktop]);
   useEffect(()=>{
     const element=host.current;
     let frame=0;
@@ -73,7 +73,7 @@ export default function WorkPreview({ project, projects }) {
 
   return <div ref={host} id="cursorPreview" className={`cursor-preview work-hover-preview${visible?' visible':''}`} aria-hidden="true" data-preview-state={!visible?'hidden':selectedStatus.error?'error':isPlaying?'playing':'loading'}>
     <div className="work-preview-shell">
-      {desktop&&pool.map(item=>{
+      {enabled&&desktop&&pool.map(item=>{
         const source=sourceFor(item),active=visible&&selected?.id===item.id;
         return <div key={item.id} className={`work-preview-layer${selected?.id===item.id?' is-current':''}`} data-project-id={item.id}>
           {isFilm(source)?<FilmPlayer className="work-preview-video" source={source} title={`${item.title} — Work preview`} poster={item.poster} background muted loop controls={false} keepMounted autoplay={active} active={active} startFraction={.5}

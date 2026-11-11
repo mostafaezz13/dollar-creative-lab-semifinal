@@ -3,7 +3,7 @@ import BrandLogo from './BrandLogo.jsx';
 import useReducedMotion from '../hooks/useReducedMotion.js';
 
 // Only the opening artwork and fonts gate entry. Remote video never blocks it.
-export default function Preloader({ posters, onComplete }) {
+export default function Preloader({ posters, onComplete, mobileMode = false }) {
   const initialPosters = useRef(posters.filter(Boolean).slice(0, 3));
   const [progress, setProgress] = useState(0);
   const [leaving, setLeaving] = useState(false);
@@ -43,7 +43,7 @@ export default function Preloader({ posters, onComplete }) {
     };
   }, [reduced, onComplete]);
   return (
-    <div className={`studio-preloader${leaving ? ' is-leaving' : ''}`} role="status" aria-label="Preparing Dollar Creative Lab" aria-live="off">
+    <div className={`studio-preloader${mobileMode ? ' mobile-preloader' : ''}${leaving ? ' is-leaving' : ''}`} role="status" aria-label="Preparing Dollar Creative Lab" aria-live="off">
       <div className="preload-shutter shutter-top"/><div className="preload-shutter shutter-bottom"/>
       <div className="preload-composition">
         <div className="preload-topline"><span>DOLLAR®<br/>CREATIVE LAB</span><span>POST PRODUCTION HOUSE<br/><i>CAIRO / WORLDWIDE</i></span></div>

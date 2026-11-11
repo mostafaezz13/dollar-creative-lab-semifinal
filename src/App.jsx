@@ -10,6 +10,7 @@ import ContactSection from './components/ContactSection.jsx';
 import VideoModal from './components/VideoModal.jsx';
 import AdminModal from './components/AdminModal.jsx';
 import useReducedMotion from './hooks/useReducedMotion.js';
+import useMobilePerformance from './hooks/useMobilePerformance.js';
 import WorkPreview from './components/WorkPreview.jsx';
 import { createEndingGate, advanceEndingGate } from './utils/endingGate.js';
 import { DEFAULT_PROJECTS, INITIAL_CARDS, PROJECTS_STORAGE_KEY } from './data/projects.js';
@@ -35,6 +36,7 @@ export default function App() {
   // 3D & Scroll state
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   const reducedMotion = useReducedMotion();
+  const mobilePerformance = useMobilePerformance();
   const [adminOpen, setAdminOpen] = useState(false);
   const [storageError, setStorageError] = useState('');
   const closeAdmin = useCallback(() => setAdminOpen(false), []);
@@ -330,8 +332,8 @@ export default function App() {
 
   return (
     <>
-      {booting && <Preloader posters={projects.map(project => project.poster)} onComplete={finishBoot}/>}
-      <div id="studioApp" className={booting ? 'studio-loading' : 'studio-ready'} inert={booting ? '' : undefined} aria-hidden={booting ? true : undefined}>
+      {booting && <Preloader mobileMode={mobilePerformance} posters={projects.map(project => project.poster)} onComplete={finishBoot}/>}
+      <div id="studioApp" data-performance={mobilePerformance ? 'mobile' : 'desktop'} className={booting ? 'studio-loading' : 'studio-ready'} inert={booting ? '' : undefined} aria-hidden={booting ? true : undefined}>
       {/* Header */}
       <Header
         theme={theme}
@@ -346,6 +348,8 @@ export default function App() {
         cards={cards}
         cameraZ={cameraZ}
         maxZ={maxZ}
+        ready={!booting}
+        mobileMode={mobilePerformance}
         paused={booting || Boolean(activeModalProject) || menuOpen || cameraZ > maxZ}
         onCardClick={(card, element) => {
           if (card.project) openProject(card.project, element);
@@ -380,6 +384,7 @@ export default function App() {
 
           <div ref={showreelRef}>
             <ShowreelSection
+              mobileMode={mobilePerformance}
               onBack={() => handleNavigate('about')}
               onNext={() => handleNavigate('work')}
               scrollOffset={cameraZ}
@@ -407,7 +412,7 @@ export default function App() {
         </div>
       </div>
 
-      <WorkPreview project={activeModalProject || menuOpen ? null : hoveredProject} projects={projects}/>
+      <WorkPreview enabled={!mobilePerformance} project={activeModalProject || menuOpen ? null : hoveredProject} projects={projects}/>
 
       {/* Scroll hint — replicated verbatim (legacy ships it as "visible hidden" and
           only ever adds "hidden", so it stays at opacity 0) */}

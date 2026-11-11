@@ -1,0 +1,26 @@
+/* Constrained mode follows the device, including an iPhone in landscape. */
+[data-performance="mobile"] #viewport { animation:none; }
+[data-performance="mobile"] .camera-rig { transform:none !important; will-change:auto; }
+[data-performance="mobile"] .depth-grid { display:none; }
+[data-performance="mobile"] .depth-type { font-size:clamp(80px,24vw,180px); -webkit-text-stroke-width:1px; }
+[data-performance="mobile"] .cinematic-card { box-shadow:0 8px 22px rgb(8 8 11 / .35); }
+[data-performance="mobile"] .cinematic-card::after { box-shadow:none; }
+[data-performance="mobile"] .ending-floor,
+[data-performance="mobile"] .ending-environment::after,
+[data-performance="mobile"] .ending-film-stack { display:none; }
+[data-performance="mobile"] .chrome-loop,
+[data-performance="mobile"] .sculpture-satellite { animation:none !important; }
+[data-performance="mobile"] .chrome-dollar { filter:none; }
+[data-performance="mobile"] .ending-sculpture { transform:translateY(-50%); }
+[data-performance="mobile"] .sculpture-axis { transform-style:flat; transform:none; }
+[data-performance="mobile"] .project-cinema,
+[data-performance="mobile"] .cult-showreel-player-box { will-change:auto; }
+[data-performance="mobile"] .contact-details { transform:none; box-shadow:none; }
+[data-performance="mobile"] [data-motion-state] { rotate:none !important; scale:none !important; }
+[data-performance="mobile"] [data-motion-state="entering"],
+[data-performance="mobile"] [data-motion-state="exiting"] { will-change:opacity,translate; }
+[data-performance="mobile"] .cursor-preview.work-hover-preview { display:none; }
+/* Keep the opening curtains and opacity fade, without the full-screen zoom. */
+.mobile-preloader .preload-composition,
+.mobile-preloader.is-leaving .preload-composition { transform:none; }
+.mobile-preloader .preload-word>.brand-logo { filter:none !important; }
