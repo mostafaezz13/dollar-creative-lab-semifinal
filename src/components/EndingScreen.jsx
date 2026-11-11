@@ -22,7 +22,7 @@ export default function EndingScreen({ onEnterWork, onContinue, visible = true }
         <span className="sculpture-caption">IDEAS IN. IMPACT OUT. ↗</span>
       </div>
       <div className="ending-screen-content">
-        <div className="ending-chapter"><span><i/>THE TUNNEL ENDS. THE STORY BEGINS.</span><span>01 — INFINITY</span></div>
+        <div className="ending-chapter"><span>THE TUNNEL ENDS. THE STORY BEGINS.</span><span>01 — INFINITY</span></div>
         <span className="brand-kicker">INDEPENDENT MINDS. ONE CREATIVE LAB.</span>
         <h2 className="ending-wordmark" aria-label="Dollar Creative Lab">{['DOLLAR','CREATIVE','LAB'].map((word,i)=><span className="ending-word-mask" key={word}><span style={{'--word-index':i}}>{i===0 ? <BrandLogo decorative eager className="ending-brand-logo"/> : word}{i===2 && <sup>®</sup>}</span></span>)}</h2>
         <div className="ending-action-line"><p className="ending-sub">We shape the cut.<br/>You feel the difference.</p><div className="ending-buttons"><button id="viewWorkBtn" className="view-work-btn" onClick={onEnterWork}>VIEW WORK <span aria-hidden="true">↗</span></button><button className="ending-roster-link" onClick={onContinue}>MEET THE STUDIO <span aria-hidden="true">↓</span></button></div></div>

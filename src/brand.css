@@ -17,11 +17,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible {
 .brand-logo-image { display:block; position:relative; width:100%; aspect-ratio:5 / 1; overflow:hidden; }
 .brand-logo img { display:block; position:absolute; top:50%; transform:translateY(-50%); width:100%; height:auto; object-fit:contain; }
 .brand-logo-caption { color:var(--soft-white); font:7px/1.4 ltsuperiormono_medium,monospace; letter-spacing:.42em; text-indent:.42em; white-space:nowrap; }
-.site-header .site-logo { display:flex; padding:6px 0; }
+.site-header .site-logo { display:flex; padding:6px 0; background:transparent !important; }
 .site-header .brand-logo img { width:100%; filter:none; }
 .site-header.header-light .brand-logo img { filter:none; }
 .site-header .brand-logo { width:144px; }
-.site-header.header-light .site-logo { padding:10px 14px; border-radius:4px; background:var(--near-black); }
+.site-header.header-light .site-logo { padding:6px 0; border-radius:0; background:transparent !important; }
 .site-header.header-light nav>a,.site-header.header-light .nav-admin-link { color:var(--near-black); }
 .site-header nav>a:hover { color:var(--dollar-green); }
 .site-header.header-light nav>a:hover { color:var(--deep-violet); }
